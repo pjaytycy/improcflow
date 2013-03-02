@@ -3,7 +3,7 @@ from django.test import TestCase
 from improcflow.models import *
 
 class FlowModelTests(TestCase):
-  def test_mean_1(self):
+  def test_mean_with_ndarray_1_to_6(self):
     element_input = InputImage(title = "element_input")
     element_input.set_value([[1, 2, 3], [4, 5, 6]])
     element_mean = OpenCVMean(title = "element_mean")
@@ -21,7 +21,7 @@ class FlowModelTests(TestCase):
     actual = element_output.result()
     self.assertEqual(expected, actual)
   
-  def test_mean_2(self):
+  def test_mean_with_ndarray_4_to_9(self):
     element_input = InputImage()
     element_input.set_value([[4, 5, 6], [7, 8, 9]])
     element_mean = OpenCVMean()
