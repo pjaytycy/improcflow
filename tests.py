@@ -36,3 +36,4 @@ class FlowModelTests(TestCase):
     expected = 6.5
     actual = element_output.number
     self.assertEqual(expected, actual)
+  

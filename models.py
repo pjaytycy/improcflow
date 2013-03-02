@@ -1,7 +1,12 @@
+import numpy
+
 from django.db import models
 
 class InputImage(models.Model):
   image = None
+  
+  def __init__(self, src):
+    self.image = src
 
 class OpenCVMean(models.Model):
   src = None
@@ -12,16 +17,20 @@ class OutputNumber(models.Model):
   
 class Flow(models.Model):
   def addElement(self, element):
-    pass
+    if type(element) == InputImage:
+      self.src = element.image
+    if type(element) == OutputNumber:
+      self.dst = element
   
   def connect(self, src, dst):
     pass
   
   def run(self):
-    pass
+    result = numpy.average(self.src)
+    self.dst.number = result
   
   
-############3
+############
 ## import datetime
 ## 
 ## from django.db import models
