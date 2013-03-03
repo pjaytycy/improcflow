@@ -1,9 +1,24 @@
 import numpy
 
-DEBUG = False
-
 from django.db import models
 
+
+DEBUG = False
+
+# some defines for valid_id:
+VALID_ID_START   = 1    # first value for the flow
+VALID_ID_NO_DATA = -1   # no data for this connector, so it can never be valid
+VALID_ID_UNKNOWN = -2   # we have data, but don't know the valid_id to assign to it => always valid
+
+# a helper function to compare valid_id's:
+def is_valid(actual_valid_id, expected_valid_id):
+  if (actual_valid_id == VALID_ID_NO_DATA):
+    return False
+  if (actual_valid_id == VALID_ID_UNKNOWN):
+    return True
+  return (actual_valid_id == expected_valid_id)
+
+# a helper function to combine 2 parts of a title
 def combine_title(part1, part2):
   if part1 is None:
     return None
@@ -15,15 +30,15 @@ def combine_title(part1, part2):
 class Connector(object):
   def __init__(self, title = None):
     self.value = None
-    self.valid = False
+    self.valid_id = VALID_ID_NO_DATA
     self.title = title
     
-  def set_value(self, value):
+  def set_value(self, value, valid_id):
     self.value = value
-    self.valid = True
+    self.valid_id = valid_id
   
-  def is_ready(self):
-    return self.valid
+  def is_ready(self, valid_id):
+    return is_valid(self.valid_id, valid_id)
 
     
 class Element(object):
@@ -56,12 +71,26 @@ class Element(object):
     if DEBUG:
       print "%s %s run" % (self.__class__.__name__, self.title)
   
-  def is_ready(self):
+  def is_ready(self, valid_id):
     for input_connector in self.input_connectors:
-      if not(input_connector.is_ready()):
+      if not(input_connector.is_ready(valid_id)):
         return False
     return True
-    
+  
+  def get_next_valid_id(self):
+    if self.flow is None:
+      new_valid_id = VALID_ID_UNKNOWN
+    else:
+      new_valid_id = self.flow.get_next_valid_id()
+    return new_valid_id
+  
+  def get_current_valid_id(self):
+    if self.flow is None:
+      current_valid_id = VALID_ID_UNKNOWN
+    else:
+      current_valid_id = self.flow.get_current_valid_id()
+    return current_valid_id
+  
   
 class Connection(Element):
   def __init__(self, title = None):
@@ -77,16 +106,20 @@ class Connection(Element):
     super(Connection, self).run()
     if DEBUG:
       print "  Connection %s from %s to %s" % (self.title, self.src.title, self.dst.title)
-    self.dst.set_value(self.src.value)
+    self.dst.set_value(self.src.value, self.src.valid_id)
 
     
 class InputImage(Element):
   def __init__(self, title = None):
     super(InputImage, self).__init__(title = title)
-    self.image = self.add_input_connector(title = "image")
+    self.dummy = self.add_input_connector(title = "")
+    self.image = self.add_output_connector(title = "image")
+    self.flow = None
 
   def set_value(self, src):
-    self.image.set_value(src)
+    new_valid_id = self.get_next_valid_id()
+    self.dummy.set_value(True, new_valid_id)
+    self.image.set_value(src, new_valid_id)
     
     
 class OpenCVMean(Element):
@@ -97,7 +130,7 @@ class OpenCVMean(Element):
     
   def run(self):
     super(OpenCVMean, self).run()
-    self.mean.set_value(numpy.average(self.src.value))
+    self.mean.set_value(numpy.average(self.src.value), self.src.valid_id)
     
   
 class OutputNumber(Element):
@@ -106,14 +139,19 @@ class OutputNumber(Element):
     self.number = self.add_input_connector(title = "number")
       
   def result(self):
-    return self.number.value
+    current_valid_id = self.get_current_valid_id()
+    if self.is_ready(current_valid_id):
+      return self.number.value
+    return None
     
   
 class Flow(object):
   def __init__(self):
     self.elements = []
+    self.valid_id = VALID_ID_START
   
-  def addElement(self, element):
+  def add_element(self, element):
+    element.flow = self
     self.elements.append(element)
   
   def connect(self, src, dst, title = None):
@@ -128,7 +166,7 @@ class Flow(object):
     elements_left = []
     elements_done = 0
     for element in elements_to_do:
-      if element.is_ready():
+      if element.is_ready(self.get_current_valid_id()):
         element.run()
         elements_done += 1
       else:
@@ -139,33 +177,9 @@ class Flow(object):
     
     return self.run(elements_left)
   
+  def get_next_valid_id(self):
+    self.valid_id += 1
+    return self.valid_id
   
-############
-## import datetime
-## 
-## from django.db import models
-## from django.utils import timezone
-## 
-## class Poll(models.Model):
-##   question = models.CharField(max_length = 200)
-##   pub_date = models.DateTimeField('date published')
-##   
-##   def was_published_recently(self):
-##     now = timezone.now()
-##     delta = datetime.timedelta(days = 1)
-##     return now - delta <= self.pub_date < now
-##   
-##   was_published_recently.admin_order_field = "pub_date"
-##   was_published_recently.boolean = True
-##   was_published_recently.short_description = "Published recently?"
-##   
-##   def __unicode__(self):
-##     return self.question
-## 
-## class Choice(models.Model):
-##   poll = models.ForeignKey(Poll)
-##   choice_text = models.CharField(max_length = 200)
-##   votes = models.IntegerField(default = 0)
-##   
-##   def __unicode__(self):
-##     return self.choice_text
+  def get_current_valid_id(self):
+    return self.valid_id
