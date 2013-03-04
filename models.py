@@ -48,6 +48,7 @@ class Element(object):
     self.input_connectors = []
     self.output_connectors = []
     self.flow = None
+    self.number_of_runs = 0
     
   def add_input_connector(self, title = None):
     input_connector = Connector(title = combine_title(self.title, title))
@@ -92,8 +93,10 @@ class Element(object):
     
     
   def run(self):
+    self.number_of_runs += 1
     if DEBUG:
-      print "%s %s run" % (self.__class__.__name__, self.title)
+      print "%s %s run (# %d)" % (self.__class__.__name__, self.title, self.number_of_runs)
+    
   
   def is_ready(self):
     for input_connector in self.input_connectors:
@@ -101,6 +104,17 @@ class Element(object):
         return False
     return True
   
+  
+  def is_done(self):
+    for output_connector in self.output_connectors:
+      if not(output_connector.is_ready()):
+        return False
+    return True
+    
+  
+  def get_number_of_executions(self):
+    return self.number_of_runs
+    
   
 class Connection(Element):
   def __init__(self, title = None):
@@ -206,7 +220,7 @@ class Flow(object):
     elements_left = []
     elements_done = 0
     for element in elements_to_do:
-      if element.is_ready():
+      if element.is_ready() and not element.is_done():
         element.run()
         elements_done += 1
       else:

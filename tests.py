@@ -121,3 +121,9 @@ class FlowModelTests(TestCase):
     actual = element_output.result()
     self.assertEqual(expected, actual)
     
+    # also test for unnecessary executions
+    self.assertEqual(1, element_input_1.get_number_of_executions())
+    self.assertEqual(1, element_input_2.get_number_of_executions())
+    self.assertEqual(2, element_mean.get_number_of_executions())
+    
+
