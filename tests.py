@@ -40,16 +40,16 @@ class FlowModelTests(TestCase):
     self.assertEqual(expected, actual)
     
   def test_mean_with_two_calls_to_run(self):
-    element_input = InputImage()
-    element_mean = OpenCVMean()
-    element_output = OutputNumber()
+    element_input = InputImage(title = "element_input")
+    element_mean = OpenCVMean(title = "element_mean")
+    element_output = OutputNumber(title = "element_output")
     
     flow = Flow()
     flow.add_element(element_input)
     flow.add_element(element_mean)
     flow.add_element(element_output)
-    flow.connect(element_input.image, element_mean.src)
-    flow.connect(element_mean.mean, element_output.number)
+    flow.connect(element_input.image, element_mean.src, title = "conn_1")
+    flow.connect(element_mean.mean, element_output.number, title = "conn_2")
 
     element_input.set_value([[1, 2, 3], [4, 5, 6]])
     flow.run()
@@ -91,3 +91,33 @@ class FlowModelTests(TestCase):
     actual = element_output.result()
     self.assertIsNone(actual)
   
+  def test_change_flow_structure_between_two_calls_to_run(self):
+    element_input_1 = InputImage(title = "element_input_1")
+    element_input_1.set_value([[1, 2, 3], [4, 5, 6]])
+    element_input_2 = InputImage(title = "element_input_2")
+    element_input_2.set_value([[4, 5], [7, 8]])
+    element_mean = OpenCVMean(title = "element_mean")
+    element_output = OutputNumber(title = "element_output")
+    
+    flow = Flow()
+    flow.add_element(element_input_1)
+    flow.add_element(element_input_2)
+    flow.add_element(element_mean)
+    flow.add_element(element_output)
+    flow.connect(element_input_1.image, element_mean.src, title = "conn_1a")
+    flow.connect(element_mean.mean, element_output.number, title = "conn_2")
+    
+    flow.run()
+    
+    expected = 3.5
+    actual = element_output.result()
+    self.assertEqual(expected, actual)
+    
+    flow.connect(element_input_2.image, element_mean.src, title = "conn_1b")
+    
+    flow.run()
+    
+    expected = 6
+    actual = element_output.result()
+    self.assertEqual(expected, actual)
+    

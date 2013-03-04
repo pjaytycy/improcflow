@@ -1,22 +1,8 @@
 import numpy
 
-from django.db import models
-
 
 DEBUG = False
 
-# some defines for valid_id:
-VALID_ID_START   = 1    # first value for the flow
-VALID_ID_NO_DATA = -1   # no data for this connector, so it can never be valid
-VALID_ID_UNKNOWN = -2   # we have data, but don't know the valid_id to assign to it => always valid
-
-# a helper function to compare valid_id's:
-def is_valid(actual_valid_id, expected_valid_id):
-  if (actual_valid_id == VALID_ID_NO_DATA):
-    return False
-  if (actual_valid_id == VALID_ID_UNKNOWN):
-    return True
-  return (actual_valid_id == expected_valid_id)
 
 # a helper function to combine 2 parts of a title
 def combine_title(part1, part2):
@@ -30,15 +16,30 @@ def combine_title(part1, part2):
 class Connector(object):
   def __init__(self, title = None):
     self.value = None
-    self.valid_id = VALID_ID_NO_DATA
+    self.valid = False
     self.title = title
     
-  def set_value(self, value, valid_id):
+  def set_value(self, value):
+    if DEBUG:
+      print "%s %s set_value" % (self.__class__.__name__, self.title)
     self.value = value
-    self.valid_id = valid_id
+    self.valid = True
   
-  def is_ready(self, valid_id):
-    return is_valid(self.valid_id, valid_id)
+  def invalidate(self):
+    # This function only invalidates this single connectors. If you 
+    # want to invalidate the full chain behind a connector, use:
+    #    flow.invalidate(connector)
+    
+    if DEBUG:
+      print "%s invalidate" % (self.title)
+      
+    self.valid = False
+  
+  def is_ready(self):
+    if DEBUG:
+      print "%s is_ready: %s" % (self.title, self.valid)
+      
+    return self.valid
 
     
 class Element(object):
@@ -46,6 +47,7 @@ class Element(object):
     self.title = title
     self.input_connectors = []
     self.output_connectors = []
+    self.flow = None
     
   def add_input_connector(self, title = None):
     input_connector = Connector(title = combine_title(self.title, title))
@@ -66,30 +68,38 @@ class Element(object):
     self.output_connectors.remove(old_output_connector)
     self.output_connectors.append(new_output_connector)
     return new_output_connector
+  
+  def invalidate(self, invalid_connector):
+    # This function only invalidates output connectors of this element. If you 
+    # want to invalidate the full chain behind a connector, use:
+    #    self.flow.invalidate(connector)
+    #
+    # invalidate all output connectors if one input connector changes
+    # only report output connectors that were valid previously!
+    if DEBUG:
+      print "%s %s invalidate" % (self.__class__.__name__, self.title)
+    
+    result = []
+    if not(invalid_connector in self.input_connectors):
+      return result
+    
+    for output_connector in self.output_connectors:
+      if output_connector.is_ready():
+        output_connector.invalidate()
+        result.append(output_connector)
+        
+    return result
+    
     
   def run(self):
     if DEBUG:
       print "%s %s run" % (self.__class__.__name__, self.title)
   
-  def is_ready(self, valid_id):
+  def is_ready(self):
     for input_connector in self.input_connectors:
-      if not(input_connector.is_ready(valid_id)):
+      if not(input_connector.is_ready()):
         return False
     return True
-  
-  def get_next_valid_id(self):
-    if self.flow is None:
-      new_valid_id = VALID_ID_UNKNOWN
-    else:
-      new_valid_id = self.flow.get_next_valid_id()
-    return new_valid_id
-  
-  def get_current_valid_id(self):
-    if self.flow is None:
-      current_valid_id = VALID_ID_UNKNOWN
-    else:
-      current_valid_id = self.flow.get_current_valid_id()
-    return current_valid_id
   
   
 class Connection(Element):
@@ -101,25 +111,34 @@ class Connection(Element):
   def set_src_dst(self, src, dst):
     self.src = self.replace_input_connector(self.src, src)
     self.dst = self.replace_output_connector(self.dst, dst)
+    if self.flow:
+      self.flow.invalidate(self.dst)
+    else:
+      self.dst.invalidate()
         
   def run(self):
     super(Connection, self).run()
     if DEBUG:
       print "  Connection %s from %s to %s" % (self.title, self.src.title, self.dst.title)
-    self.dst.set_value(self.src.value, self.src.valid_id)
+    self.dst.set_value(self.src.value)
 
     
 class InputImage(Element):
   def __init__(self, title = None):
     super(InputImage, self).__init__(title = title)
-    self.dummy = self.add_input_connector(title = "")
+    self.dummy = self.add_input_connector(title = "dummy")
     self.image = self.add_output_connector(title = "image")
-    self.flow = None
 
   def set_value(self, src):
-    new_valid_id = self.get_next_valid_id()
-    self.dummy.set_value(True, new_valid_id)
-    self.image.set_value(src, new_valid_id)
+    self.dummy.set_value(src)
+    if self.flow:
+      self.flow.invalidate(self.image)
+    else:
+      self.image.invalidate()
+  
+  def run(self):
+    super(InputImage, self).run()
+    self.image.set_value(self.dummy.value)
     
     
 class OpenCVMean(Element):
@@ -130,7 +149,7 @@ class OpenCVMean(Element):
     
   def run(self):
     super(OpenCVMean, self).run()
-    self.mean.set_value(numpy.average(self.src.value), self.src.valid_id)
+    self.mean.set_value(numpy.average(self.src.value))
     
   
 class OutputNumber(Element):
@@ -139,8 +158,7 @@ class OutputNumber(Element):
     self.number = self.add_input_connector(title = "number")
       
   def result(self):
-    current_valid_id = self.get_current_valid_id()
-    if self.is_ready(current_valid_id):
+    if self.is_ready():
       return self.number.value
     return None
     
@@ -148,16 +166,38 @@ class OutputNumber(Element):
 class Flow(object):
   def __init__(self):
     self.elements = []
-    self.valid_id = VALID_ID_START
   
   def add_element(self, element):
     element.flow = self
     self.elements.append(element)
   
   def connect(self, src, dst, title = None):
+    for element in self.elements:
+      if type(element) != Connection:
+        continue
+      if (element.dst != dst):
+        continue
+      self.disconnect(element)
+      break
+      
     connection = Connection(title = title)
     connection.set_src_dst(src, dst)
     self.elements.append(connection)
+  
+  def disconnect(self, connection):
+    self.elements.remove(connection)
+    self.invalidate(connection.dst)
+  
+  
+  def invalidate(self, invalid_connector):
+    invalid_connector.invalidate()
+    for element in self.elements:
+      if invalid_connector in element.input_connectors:
+        # only return connectors which were still valid and are now made invalid
+        new_invalid_connectors = element.invalidate(invalid_connector)
+        for new_invalid_connector in new_invalid_connectors:
+          self.invalidate(new_invalid_connector)
+          
   
   def run(self, elements_to_do = None):
     if elements_to_do is None:
@@ -166,7 +206,7 @@ class Flow(object):
     elements_left = []
     elements_done = 0
     for element in elements_to_do:
-      if element.is_ready(self.get_current_valid_id()):
+      if element.is_ready():
         element.run()
         elements_done += 1
       else:
@@ -177,9 +217,3 @@ class Flow(object):
     
     return self.run(elements_left)
   
-  def get_next_valid_id(self):
-    self.valid_id += 1
-    return self.valid_id
-  
-  def get_current_valid_id(self):
-    return self.valid_id
