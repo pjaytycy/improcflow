@@ -187,7 +187,7 @@ class Flow(object):
   
   def connect(self, src, dst, title = None):
     for element in self.elements:
-      if type(element) != Connection:
+      if not(isinstance(element, Connection)):
         continue
       if (element.dst != dst):
         continue
