@@ -1,6 +1,6 @@
 from django.test import TestCase
 
-from improcflow.models import *
+from improcflow.logic import *
 
 class FlowModelTests(TestCase):
   def test_mean_with_ndarray_1_to_6(self):
