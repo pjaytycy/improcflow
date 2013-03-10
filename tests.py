@@ -2,7 +2,7 @@ from django.test import TestCase
 
 from improcflow.logic import *
 
-class FlowModelTests(TestCase):
+class FlowLogicTests(TestCase):
   def test_mean_with_ndarray_1_to_6(self):
     element_input = InputImage(title = "element_input")
     element_input.set_value([[1, 2, 3], [4, 5, 6]])
