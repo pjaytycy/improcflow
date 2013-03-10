@@ -50,7 +50,23 @@ class Element(object):
     self.output_connectors = []
     self.flow = None
     self.number_of_runs = 0
+    if title is None:
+      self.element_model = ElementModel()
+    else:
+      self.element_model = ElementModel(title = title)
+
+  def set_flow(self, flow):
+    self.flow = flow
+    self.element_model.flow = flow.flow_model
+    self.element_model.save()
     
+  @classmethod
+  def load_from_database(cls, element_id = None, element_model = None):
+    if element_model is None:
+      element_model = ElementModel.objects.get(pk = element_id)
+    element = cls(element_model.title)
+    return element
+  
   def add_input_connector(self, title = None):
     input_connector = Connector(title = combine_title(self.title, title))
     self.input_connectors.append(input_connector)
@@ -198,13 +214,26 @@ class Flow(object):
     self.flow_model = FlowModel.objects.get(pk = flow_id)
     self.title = self.flow_model.title
     self.elements = []
+    for element_model in self.flow_model.elementmodel_set.all():
+      element = Element.load_from_database(element_model = element_model)
+      element.set_flow(self)
+      self.elements.append(element)
     
   def get_id(self):
     return self.flow_model.id
   
   def add_element(self, element):
-    element.flow = self
+    element.set_flow(self)
     self.elements.append(element)
+  
+  def get_element(self, title = None):
+    for element in self.elements:
+      if element.title == title:
+        return element
+    return None
+  
+  def get_num_elements(self):
+    return len(self.elements)
   
   def connect(self, src, dst, title = None):
     for element in self.elements:

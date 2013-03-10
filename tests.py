@@ -138,4 +138,19 @@ class FlowLogicTests(TestCase):
     actual = flow2.get_id()
     self.assertEqual(expected, actual)
     
+  def test_save_and_load_a_flow_with_one_element(self):
+    flow1 = Flow(title = "test_flow_with_one_element")
+    flow1.add_element(InputImage("test_element"))
+    flow_id = flow1.get_id()
     
+    flow2 = Flow(flow_id = flow_id)
+    
+    expected = 1
+    actual = flow2.get_num_elements()
+    self.assertEqual(expected, actual)
+    
+    element = flow2.get_element("test_element")
+    
+    expected = "test_element"
+    actual = element.title
+    self.assertEqual(expected, actual)
