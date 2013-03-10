@@ -126,7 +126,7 @@ class FlowLogicTests(TestCase):
     self.assertEqual(1, element_input_2.get_number_of_executions())
     self.assertEqual(2, element_mean.get_number_of_executions())
   
-  def test_save_and_load_a_flow(self):
+  def test_save_and_load_an_empty_flow(self):
     flow = Flow(title = "test_flow")
     flow_id = flow.get_id()
     flow2 = Flow(flow_id = flow_id)
