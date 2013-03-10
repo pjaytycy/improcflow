@@ -125,5 +125,32 @@ class FlowLogicTests(TestCase):
     self.assertEqual(1, element_input_1.get_number_of_executions())
     self.assertEqual(1, element_input_2.get_number_of_executions())
     self.assertEqual(2, element_mean.get_number_of_executions())
+  
+  def test_save_and_load_a_flow(self):
+    element_input = InputImage("element_input")
+    element_mean = OpenCVMean("element_mean")
+    element_output = OutputNumber("element_output")
     
+    flow = Flow()
+    flow.add_element(element_input)
+    flow.add_element(element_mean)
+    flow.add_element(element_output)
+    flow.connect(element_input.image, element_mean.src)
+    flow.connect(element_mean.mean, element_output.number)
 
+    flow_id = flow.get_id()
+    del flow
+    del element_input
+    del element_mean
+    del element_output
+    
+    flow2 = Flow(flow_id)
+    element_input = flow2.get_element("element_input")
+    element_output = flow2.get_element("element_output")
+    
+    element_input.set_value([[1, 2, 3], [4, 5, 6]])
+    flow2.run()
+    expected = 3.5
+    actual = element_output.result()
+    self.assertEqual(expected, actual)
+    
