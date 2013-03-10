@@ -1,5 +1,6 @@
 import numpy
 
+from improcflow.models import *
 
 DEBUG = False
 
@@ -178,8 +179,28 @@ class OutputNumber(Element):
     
   
 class Flow(object):
-  def __init__(self):
+  def __init__(self, title = None, flow_id = None):
+    if flow_id is None:
+      self.create_new(title)
+    else:
+      self.load_from_database(flow_id)
+        
+  def create_new(self, title = None):
     self.elements = []
+    self.title = title
+    if title is None:
+      self.flow_model = FlowModel()
+    else:
+      self.flow_model = FlowModel(title = title)
+    self.flow_model.save()
+    
+  def load_from_database(self, flow_id):
+    self.flow_model = FlowModel.objects.get(pk = flow_id)
+    self.title = self.flow_model.title
+    self.elements = []
+    
+  def get_id(self):
+    return self.flow_model.id
   
   def add_element(self, element):
     element.flow = self
