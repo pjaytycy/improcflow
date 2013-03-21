@@ -154,3 +154,8 @@ class FlowLogicTests(TestCase):
     expected = "test_element"
     actual = element.title
     self.assertEqual(expected, actual)
+    
+    expected = InputImage
+    actual = type(element)
+    self.assertEqual(expected, actual)
+    
