@@ -159,3 +159,30 @@ class FlowLogicTests(TestCase):
     actual = type(element)
     self.assertEqual(expected, actual)
     
+  def test_save_and_load_a_flow_with_multiple_elements(self):
+    flow1 = Flow()
+    flow1.add_element(InputImage("test_input_image_1"))
+    flow1.add_element(InputImage("test_input_image_2"))
+    flow1.add_element(OpenCVMean("test_opencv_mean"))
+    flow1.add_element(OutputNumber("test_output_number"))
+    
+    flow_id = flow1.get_id()
+    
+    flow2 = Flow(flow_id = flow_id)
+    self.assertEqual(4, flow2.get_num_elements())
+    
+    element = flow2.get_element("test_input_image_1")
+    self.assertEqual("test_input_image_1", element.title)
+    self.assertEqual(InputImage, type(element))
+    
+    element = flow2.get_element("test_input_image_2")
+    self.assertEqual("test_input_image_2", element.title)
+    self.assertEqual(InputImage, type(element))
+    
+    element = flow2.get_element("test_opencv_mean")
+    self.assertEqual("test_opencv_mean", element.title)
+    self.assertEqual(OpenCVMean, type(element))
+    
+    element = flow2.get_element("test_output_number")
+    self.assertEqual("test_output_number", element.title)
+    self.assertEqual(OutputNumber, type(element))
