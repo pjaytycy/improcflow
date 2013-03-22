@@ -1,6 +1,6 @@
-import numpy
-
 from improcflow.logic import Element, register_element_type
+
+import numpy
 
 class OpenCVMean(Element):
   class_name = "opencv_mean"

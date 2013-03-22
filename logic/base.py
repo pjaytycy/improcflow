@@ -16,7 +16,7 @@ def combine_title(part1, part2):
     return None
   return str(part1) + "." + str(part2)
 
-  
+
 class Connector(object):
   def __init__(self, title = None):
     self.value = None
@@ -44,6 +44,7 @@ class Connector(object):
       print "%s is_ready: %s" % (self.title, self.valid)
       
     return self.valid
+
 
 class Element(object):
   class_name = "element"
@@ -139,7 +140,7 @@ class Element(object):
     
 register_element_type(Element)
 
-  
+
 class Connection(Element):
   class_name = "connection"
   

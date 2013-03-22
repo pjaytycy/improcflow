@@ -21,8 +21,7 @@ class InputImage(Element):
     
 register_element_type(InputImage)
 
-    
-  
+
 class OutputNumber(Element):
   class_name = "output_number"
   
