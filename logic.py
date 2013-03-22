@@ -16,7 +16,10 @@ def combine_title(part1, part2):
 
 # a dictionary to keep string => class mapping
 element_model_to_class = {}
+def register_element_type(cls):
+  element_model_to_class[cls.class_name] = cls
 
+  
 class Connector(object):
   def __init__(self, title = None):
     self.value = None
@@ -46,16 +49,18 @@ class Connector(object):
     return self.valid
 
 class Element(object):
-  def __init__(self, title = None, class_name = "element"):
+  class_name = "element"
+  
+  def __init__(self, title = None):
     self.title = title
     self.input_connectors = []
     self.output_connectors = []
     self.flow = None
     self.number_of_runs = 0
     if title is None:
-      self.element_model = ElementModel(class_name = class_name)
+      self.element_model = ElementModel(class_name = self.class_name)
     else:
-      self.element_model = ElementModel(class_name = class_name, title = title)
+      self.element_model = ElementModel(class_name = self.class_name, title = title)
 
   def set_flow(self, flow):
     self.flow = flow
@@ -135,12 +140,14 @@ class Element(object):
   def get_number_of_executions(self):
     return self.number_of_runs
     
-element_model_to_class["element"] = Element
+register_element_type(Element)
 
   
 class Connection(Element):
+  class_name = "connection"
+  
   def __init__(self, title = None):
-    super(Connection, self).__init__(title = title, class_name = "connection")
+    super(Connection, self).__init__(title = title)
     self.src = self.add_input_connector()
     self.dst = self.add_output_connector()
   
@@ -158,12 +165,14 @@ class Connection(Element):
       print "  Connection %s from %s to %s" % (self.title, self.src.title, self.dst.title)
     self.dst.set_value(self.src.value)
 
-element_model_to_class["connection"] = Connection
+register_element_type(Connection)
 
     
 class InputImage(Element):
+  class_name = "input_image"
+  
   def __init__(self, title = None):
-    super(InputImage, self).__init__(title = title, class_name = "input_image")
+    super(InputImage, self).__init__(title = title)
     self.dummy = self.add_input_connector(title = "dummy")
     self.image = self.add_output_connector(title = "image")
 
@@ -178,12 +187,14 @@ class InputImage(Element):
     super(InputImage, self).run()
     self.image.set_value(self.dummy.value)
     
-element_model_to_class["input_image"] = InputImage
+register_element_type(InputImage)
 
     
 class OpenCVMean(Element):
+  class_name = "opencv_mean"
+  
   def __init__(self, title = None):
-    super(OpenCVMean, self).__init__(title = title, class_name = "opencv_mean")
+    super(OpenCVMean, self).__init__(title = title)
     self.src = self.add_input_connector(title = "src")
     self.mean = self.add_output_connector(title = "mean")
     
@@ -191,12 +202,14 @@ class OpenCVMean(Element):
     super(OpenCVMean, self).run()
     self.mean.set_value(numpy.average(self.src.value))
     
-element_model_to_class["opencv_mean"] = OpenCVMean
+register_element_type(OpenCVMean)
 
   
 class OutputNumber(Element):
+  class_name = "output_number"
+  
   def __init__(self, title = None):
-    super(OutputNumber, self).__init__(title = title, class_name = "output_number")
+    super(OutputNumber, self).__init__(title = title)
     self.number = self.add_input_connector(title = "number")
       
   def result(self):
@@ -204,7 +217,7 @@ class OutputNumber(Element):
       return self.number.value
     return None
     
-element_model_to_class["output_number"] = OutputNumber
+register_element_type(OutputNumber)
 
   
 class Flow(object):
