@@ -1,10 +1,13 @@
-import numpy
-
-from improcflow.models import *
+from improcflow.models import ElementModel
 
 DEBUG = False
 
-
+# a dictionary to keep string => class mapping
+element_model_to_class = {}
+def register_element_type(cls):
+  element_model_to_class[cls.class_name] = cls
+  
+  
 # a helper function to combine 2 parts of a title
 def combine_title(part1, part2):
   if part1 is None:
@@ -12,12 +15,6 @@ def combine_title(part1, part2):
   if part2 is None:
     return None
   return str(part1) + "." + str(part2)
-
-
-# a dictionary to keep string => class mapping
-element_model_to_class = {}
-def register_element_type(cls):
-  element_model_to_class[cls.class_name] = cls
 
   
 class Connector(object):
@@ -166,144 +163,3 @@ class Connection(Element):
     self.dst.set_value(self.src.value)
 
 register_element_type(Connection)
-
-    
-class InputImage(Element):
-  class_name = "input_image"
-  
-  def __init__(self, title = None):
-    super(InputImage, self).__init__(title = title)
-    self.dummy = self.add_input_connector(title = "dummy")
-    self.image = self.add_output_connector(title = "image")
-
-  def set_value(self, src):
-    self.dummy.set_value(src)
-    if self.flow:
-      self.flow.invalidate(self.image)
-    else:
-      self.image.invalidate()
-  
-  def run(self):
-    super(InputImage, self).run()
-    self.image.set_value(self.dummy.value)
-    
-register_element_type(InputImage)
-
-    
-class OpenCVMean(Element):
-  class_name = "opencv_mean"
-  
-  def __init__(self, title = None):
-    super(OpenCVMean, self).__init__(title = title)
-    self.src = self.add_input_connector(title = "src")
-    self.mean = self.add_output_connector(title = "mean")
-    
-  def run(self):
-    super(OpenCVMean, self).run()
-    self.mean.set_value(numpy.average(self.src.value))
-    
-register_element_type(OpenCVMean)
-
-  
-class OutputNumber(Element):
-  class_name = "output_number"
-  
-  def __init__(self, title = None):
-    super(OutputNumber, self).__init__(title = title)
-    self.number = self.add_input_connector(title = "number")
-      
-  def result(self):
-    if self.is_ready():
-      return self.number.value
-    return None
-    
-register_element_type(OutputNumber)
-
-  
-class Flow(object):
-  def __init__(self, title = None, flow_id = None):
-    if flow_id is None:
-      self.create_new(title)
-    else:
-      self.load_from_database(flow_id)
-        
-  def create_new(self, title = None):
-    self.elements = []
-    self.title = title
-    if title is None:
-      self.flow_model = FlowModel()
-    else:
-      self.flow_model = FlowModel(title = title)
-    self.flow_model.save()
-    
-  def load_from_database(self, flow_id):
-    self.flow_model = FlowModel.objects.get(pk = flow_id)
-    self.title = self.flow_model.title
-    self.elements = []
-    for element_model in self.flow_model.elementmodel_set.all():
-      element = Element.load_from_database(element_model = element_model)
-      element.set_flow(self)
-      self.elements.append(element)
-    
-  def get_id(self):
-    return self.flow_model.id
-  
-  def add_element(self, element):
-    element.set_flow(self)
-    self.elements.append(element)
-  
-  def get_element(self, title = None):
-    for element in self.elements:
-      if element.title == title:
-        return element
-    return None
-  
-  def get_num_elements(self):
-    return len(self.elements)
-  
-  def connect(self, src, dst, title = None):
-    for element in self.elements:
-      if not(isinstance(element, Connection)):
-        continue
-      if (element.dst != dst):
-        continue
-      self.disconnect(element)
-      break
-      
-    connection = Connection(title = title)
-    connection.set_src_dst(src, dst)
-    self.elements.append(connection)
-  
-  def disconnect(self, connection):
-    self.elements.remove(connection)
-    self.invalidate(connection.dst)
-  
-  
-  def invalidate(self, invalid_connector):
-    invalid_connector.invalidate()
-    for element in self.elements:
-      if invalid_connector in element.input_connectors:
-        # only return connectors which were still valid and are now made invalid
-        new_invalid_connectors = element.invalidate(invalid_connector)
-        for new_invalid_connector in new_invalid_connectors:
-          self.invalidate(new_invalid_connector)
-          
-  
-  def run(self, elements_to_do = None):
-    if elements_to_do is None:
-      elements_to_do = self.elements[:]
-    
-    elements_left = []
-    elements_done = 0
-    for element in elements_to_do:
-      if element.is_ready() and not element.is_done():
-        element.run()
-        elements_done += 1
-      else:
-        elements_left.append(element)
-    
-    if elements_done == 0:
-      return True
-    
-    return self.run(elements_left)
-  
