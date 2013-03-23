@@ -1,4 +1,4 @@
-from improcflow.models import ElementModel
+from improcflow.models import ElementModel, ConnectionModel
 
 DEBUG = False
 
@@ -8,24 +8,20 @@ def register_element_type(cls):
   element_model_to_class[cls.class_name] = cls
   
   
-# a helper function to combine 2 parts of a title
-def combine_title(part1, part2):
-  if part1 is None:
-    return None
-  if part2 is None:
-    return None
-  return str(part1) + "." + str(part2)
-
-
+def get_class_for_element_type(class_name):
+  return element_model_to_class[class_name]
+  
+  
 class Connector(object):
-  def __init__(self, title = None):
+  def __init__(self, element, title = None):
     self.value = None
     self.valid = False
+    self.element = element
     self.title = title
     
   def set_value(self, value):
     if DEBUG:
-      print "%s %s set_value" % (self.__class__.__name__, self.title)
+      print "%s %s %s set_value" % (self.__class__.__name__, self.element.title, self.title)
     self.value = value
     self.valid = True
   
@@ -35,13 +31,13 @@ class Connector(object):
     #    flow.invalidate(connector)
     
     if DEBUG:
-      print "%s invalidate" % (self.title)
+      print "%s %s invalidate" % (self.element.title, self.title)
       
     self.valid = False
   
   def is_ready(self):
     if DEBUG:
-      print "%s is_ready: %s" % (self.title, self.valid)
+      print "%s %s is_ready: %s" % (self.element.title, self.title, self.valid)
       
     return self.valid
 
@@ -49,12 +45,18 @@ class Connector(object):
 class Element(object):
   class_name = "element"
   
-  def __init__(self, title = None):
-    self.title = title
+  def __init__(self, title = None, element_model = None):
     self.input_connectors = []
     self.output_connectors = []
     self.flow = None
     self.number_of_runs = 0
+    if element_model is None:
+      self.create_new(title)
+    else:
+      self.load_from_database(element_model = element_model)
+      
+  def create_new(self, title = None):
+    self.title = title
     if title is None:
       self.element_model = ElementModel(class_name = self.class_name)
     else:
@@ -65,21 +67,17 @@ class Element(object):
     self.element_model.flow = flow.flow_model
     self.element_model.save()
     
-  @classmethod
-  def load_from_database(cls, element_id = None, element_model = None):
-    if element_model is None:
-      element_model = ElementModel.objects.get(pk = element_id)
-    specific_class = element_model_to_class[element_model.class_name]
-    element = specific_class(element_model.title)
-    return element
+  def load_from_database(self, element_model = None):
+    self.element_model = element_model
+    self.title = self.element_model.title
   
   def add_input_connector(self, title = None):
-    input_connector = Connector(title = combine_title(self.title, title))
+    input_connector = Connector(element = self, title = title)
     self.input_connectors.append(input_connector)
     return input_connector
   
   def add_output_connector(self, title = None):
-    output_connector = Connector(title = combine_title(self.title, title))
+    output_connector = Connector(element = self, title = title)
     self.output_connectors.append(output_connector)
     return output_connector
   
@@ -92,6 +90,17 @@ class Element(object):
     self.output_connectors.remove(old_output_connector)
     self.output_connectors.append(new_output_connector)
     return new_output_connector
+  
+  def get_connector(self, connector_title):
+    for connector in self.input_connectors:
+      if connector.title == connector_title:
+        return connector
+    
+    for connector in self.output_connectors:
+      if connector.title == connector_title:
+        return connector
+    
+    return None
   
   def invalidate(self, invalid_connector):
     # This function only invalidates output connectors of this element. If you 
@@ -144,18 +153,38 @@ register_element_type(Element)
 class Connection(Element):
   class_name = "connection"
   
-  def __init__(self, title = None):
-    super(Connection, self).__init__(title = title)
+  def __init__(self, title = None, element_model = None):
+    super(Connection, self).__init__(title = title, element_model = element_model)
     self.src = self.add_input_connector()
     self.dst = self.add_output_connector()
+    if element_model is None:
+      self.connection_model = None
+    else:
+      self.connection_model = element_model.connectionmodel
+  
+  
+  def set_flow(self, flow):
+    super(Connection, self).set_flow(flow)
+    # this is the place where the element_model gets saved, so I can create the connection model
+    if self.connection_model is None:
+      self.connection_model = ConnectionModel(element = self.element_model)
+
   
   def set_src_dst(self, src, dst):
     self.src = self.replace_input_connector(self.src, src)
     self.dst = self.replace_output_connector(self.dst, dst)
+    
+    self.connection_model.src_element = src.element.element_model
+    self.connection_model.src_connector = src.title
+    self.connection_model.dst_element = dst.element.element_model
+    self.connection_model.dst_connector = dst.title
+    self.connection_model.save()
+    
     if self.flow:
       self.flow.invalidate(self.dst)
     else:
       self.dst.invalidate()
+    
         
   def run(self):
     super(Connection, self).run()

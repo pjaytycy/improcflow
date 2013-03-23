@@ -186,3 +186,29 @@ class FlowLogicTests(TestCase):
     element = flow2.get_element("test_output_number")
     self.assertEqual("test_output_number", element.title)
     self.assertEqual(OutputNumber, type(element))
+    
+  def test_save_and_load_a_flow_with_connections(self):
+    element_input = InputImage("test_input")
+    element_mean = OpenCVMean()
+    element_output = OutputNumber("test_output")
+    
+    flow = Flow()
+    flow.add_element(element_input)
+    flow.add_element(element_mean)
+    flow.add_element(element_output)
+    flow.connect(element_input.image, element_mean.src)
+    flow.connect(element_mean.mean, element_output.number)
+    
+    flow_id = flow.get_id()
+    
+    flow2 = Flow(flow_id = flow_id)
+    element_input2 = flow2.get_element("test_input")
+    element_output2 = flow2.get_element("test_output")
+    element_input2.set_value([[1, 1], [3, 3]])
+    
+    flow2.run()
+    self.assertEqual(2, element_output2.result())
+
+#-------- ideas for further tests------------
+# 1) store values and & valid attribute of connectors
+# 2) test if an automatic disconnect() does not leave the old connection in the DB

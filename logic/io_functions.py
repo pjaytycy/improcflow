@@ -3,8 +3,8 @@ from improcflow.logic import Element, register_element_type
 class InputImage(Element):
   class_name = "input_image"
   
-  def __init__(self, title = None):
-    super(InputImage, self).__init__(title = title)
+  def __init__(self, title = None, element_model = None):
+    super(InputImage, self).__init__(title = title, element_model = element_model)
     self.dummy = self.add_input_connector(title = "dummy")
     self.image = self.add_output_connector(title = "image")
 
@@ -25,8 +25,8 @@ register_element_type(InputImage)
 class OutputNumber(Element):
   class_name = "output_number"
   
-  def __init__(self, title = None):
-    super(OutputNumber, self).__init__(title = title)
+  def __init__(self, title = None, element_model = None):
+    super(OutputNumber, self).__init__(title = title, element_model = element_model)
     self.number = self.add_input_connector(title = "number")
       
   def result(self):

@@ -1,4 +1,5 @@
-from base import register_element_type, Connector, Element, Connection
+from base import register_element_type, get_class_for_element_type
+from base import Connector, Element, Connection
 from flow import Flow
 
 # the files imported below should only reference the classes / functions explicitly imported above

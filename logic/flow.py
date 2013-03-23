@@ -1,4 +1,5 @@
 from improcflow.models import FlowModel
+from improcflow.logic import get_class_for_element_type
 from improcflow.logic import Element, Connection
 
 
@@ -23,9 +24,23 @@ class Flow(object):
     self.title = self.flow_model.title
     self.elements = []
     for element_model in self.flow_model.elementmodel_set.all():
-      element = Element.load_from_database(element_model = element_model)
+      specific_class = get_class_for_element_type(element_model.class_name)
+      element = specific_class(element_model = element_model)
       element.set_flow(self)
       self.elements.append(element)
+    
+    for element in self.elements:
+      if not(isinstance(element, Connection)):
+        continue
+      
+      src_element_id = element.connection_model.src_element.id
+      dst_element_id = element.connection_model.dst_element.id
+      src_element = self.get_element(element_id = src_element_id)
+      dst_element = self.get_element(element_id = dst_element_id)
+      src = src_element.get_connector(element.connection_model.src_connector)
+      dst = dst_element.get_connector(element.connection_model.dst_connector)
+      element.set_src_dst(src, dst)
+    
     
   def get_id(self):
     return self.flow_model.id
@@ -34,10 +49,16 @@ class Flow(object):
     element.set_flow(self)
     self.elements.append(element)
   
-  def get_element(self, title = None):
-    for element in self.elements:
-      if element.title == title:
-        return element
+  def get_element(self, title = None, element_id = None):
+    if element_id is not None:
+      for element in self.elements:
+        if element.element_model.id == element_id:
+          return element
+          
+    if title is not None:
+      for element in self.elements:
+        if element.title == title:
+          return element
     return None
   
   def get_num_elements(self):
@@ -53,6 +74,7 @@ class Flow(object):
       break
       
     connection = Connection(title = title)
+    connection.set_flow(self)
     connection.set_src_dst(src, dst)
     self.elements.append(connection)
   
