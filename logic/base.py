@@ -1,4 +1,5 @@
 from improcflow.models import ElementModel, ConnectionModel
+from improcflow.logic.convert import convert_data
 
 DEBUG = False
 
@@ -13,16 +14,17 @@ def get_class_for_element_type(class_name):
   
   
 class Connector(object):
-  def __init__(self, element, title = None):
+  def __init__(self, element, title = None, data_types = None):
     self.value = None
     self.valid = False
     self.element = element
     self.title = title
+    self.data_types = data_types
     
   def set_value(self, value):
     if DEBUG:
       print "%s %s %s set_value" % (self.__class__.__name__, self.element.title, self.title)
-    self.value = value
+    self.value = convert_data(value, self.data_types)
     self.valid = True
   
   def invalidate(self):
@@ -71,8 +73,8 @@ class Element(object):
     self.element_model = element_model
     self.title = self.element_model.title
   
-  def add_input_connector(self, title = None):
-    input_connector = Connector(element = self, title = title)
+  def add_input_connector(self, title = None, data_types = None):
+    input_connector = Connector(element = self, title = title, data_types = data_types)
     self.input_connectors.append(input_connector)
     return input_connector
   
