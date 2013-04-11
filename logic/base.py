@@ -1,5 +1,5 @@
 from improcflow.models import ElementModel, ConnectionModel
-from improcflow.logic.convert import convert_data
+from improcflow.logic import convert_data
 
 DEBUG = False
 
