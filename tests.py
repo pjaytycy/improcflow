@@ -215,6 +215,7 @@ class FlowLogicTests(TestCase):
     
     
 #-------- ideas for further tests------------
+# 0) refactor tests into a separate module instead of this 1 long file
 # 1) store values and & valid attribute of connectors
 # 2) test if an automatic disconnect() does not leave the old connection in the DB
 
