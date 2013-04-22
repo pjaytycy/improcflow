@@ -1,3 +1,5 @@
+import unittest
+
 from django.test import TestCase
 
 from improcflow.logic import *
@@ -209,6 +211,46 @@ class FlowLogicTests(TestCase):
     
     flow2.run()
     self.assertEqual(2, element_output2.result())
+
+  def test_change_structure_after_save_and_load_database(self):
+    element_input = InputImage("test_input1")
+    element_mean = OpenCVMean("test_mean")
+    element_output = OutputNumber("test_output")
     
-
-
+    flow = Flow()
+    flow.add_element(element_input)
+    flow.add_element(element_mean)
+    flow.add_element(element_output)
+    flow.connect(element_input.image, element_mean.src, title = "connection1")
+    flow.connect(element_mean.mean, element_output.number, title = "connection2")
+    
+    element_input.set_value([[3, 4], [6, 7]])
+    flow.run()
+    self.assertEqual(5, element_output.result())
+    
+    flow_id = flow.get_id()
+    
+    flow2 = Flow(flow_id = flow_id)
+    # try to get the original connection; it should be present
+    connection1 = flow2.get_element("connection1")
+    self.assertIsNotNone(connection1)
+    
+    element_input2 = InputImage("test_input2")
+    flow2.add_element(element_input2)
+    element_mean2 = flow2.get_element("test_mean")
+    flow2.connect(element_input2.image, element_mean2.src, title = "connection3")
+    
+    element_input2.set_value([[1, 2], [4, 5]])
+    flow2.run()
+    element_output2 = flow2.get_element("test_output")
+    self.assertEqual(3, element_output2.result())
+    
+    # try to get the new connection; it should be present
+    connection3 = flow2.get_element("connection3")
+    self.assertIsNotNone(connection3)
+    
+    # try to get the original connection; it should NOT be present
+    with self.assertRaises(ElementNotFoundError):
+      connection1 = flow2.get_element("connection1")
+    
+    ## TODO: make sure the connection is really not in the database!

@@ -2,6 +2,8 @@ from improcflow.models import FlowModel
 from improcflow.logic import get_class_for_element_type
 from improcflow.logic import Element, Connection
 
+class ElementNotFoundError(Exception):
+  pass
 
 class Flow(object):
   def __init__(self, title = None, flow_id = None):
@@ -54,12 +56,15 @@ class Flow(object):
       for element in self.elements:
         if element.element_model.id == element_id:
           return element
+      raise ElementNotFoundError("Could not find element with id == %d" % (element_id))
           
     if title is not None:
       for element in self.elements:
         if element.title == title:
           return element
-    return None
+      raise ElementNotFoundError("Could not find element with title == %s" % (title))
+  
+    raise ValueError("Atleast title or element_id should be provided")
   
   def get_num_elements(self):
     return len(self.elements)
