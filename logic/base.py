@@ -73,6 +73,9 @@ class Element(object):
     self.element_model = element_model
     self.title = self.element_model.title
   
+  def delete(self):
+    self.element_model.delete()
+    
   def add_input_connector(self, title = None, data_types = None):
     input_connector = Connector(element = self, title = title, data_types = data_types)
     self.input_connectors.append(input_connector)

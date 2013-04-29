@@ -3,7 +3,7 @@ import unittest
 from django.test import TestCase
 
 from improcflow.logic import *
-
+from improcflow.models import ElementModel, ConnectionModel
 
 class FlowLogicTests(TestCase):
   def test_mean_with_ndarray_1_to_6(self):
@@ -253,4 +253,5 @@ class FlowLogicTests(TestCase):
     with self.assertRaises(ElementNotFoundError):
       connection1 = flow2.get_element("connection1")
     
-    ## TODO: make sure the connection is really not in the database!
+    # make sure the connection is really not in the database!
+    self.assertEqual(2, len(ConnectionModel.objects.all()))

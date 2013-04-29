@@ -86,6 +86,7 @@ class Flow(object):
   def disconnect(self, connection):
     self.elements.remove(connection)
     self.invalidate(connection.dst)
+    connection.delete()
   
   
   def invalidate(self, invalid_connector):
