@@ -1,3 +1,3 @@
 ------- ideas for further tests------------
-*) refactor "connection removed from DB" so Django API is not used anymore
+*) implement more OpenCV calls so a "simple" real program from the examples can be created
 *) store values and & valid attribute of connectors

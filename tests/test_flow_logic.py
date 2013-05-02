@@ -3,7 +3,6 @@ import unittest
 from django.test import TestCase
 
 from improcflow.logic import *
-from improcflow.models import ElementModel, ConnectionModel
 
 class FlowLogicTests(TestCase):
   def test_mean_with_ndarray_1_to_6(self):
@@ -254,7 +253,7 @@ class FlowLogicTests(TestCase):
       connection1 = flow2.get_element("connection1")
     
     # make sure the connection is really not in the database!
-    self.assertEqual(2, len(ConnectionModel.objects.all()))
+    self.assertEqual(2, len(Connection.get_all_saved_connections()))
   
   
   def test_remove_element_from_flow(self):
@@ -276,14 +275,14 @@ class FlowLogicTests(TestCase):
    # make sure 3 elements + 2 connections are present in the flow object
    self.assertEqual(5, flow.get_num_elements())
    # make sure 2 connections are present in the DB
-   self.assertEqual(2, len(ConnectionModel.objects.all()))
+   self.assertEqual(2, len(Connection.get_all_saved_connections()))
 
    flow.remove_element(element_mean)
    
    # make sure 2 elements + 0 connections are present in the flow object
    self.assertEqual(2, flow.get_num_elements())
    # make sure all connections are gone in the DB
-   self.assertEqual(0, len(ConnectionModel.objects.all()))
+   self.assertEqual(0, len(Connection.get_all_saved_connections()))
    
    # make sure the end result is invalid
    self.assertEqual(None, element_output.result())

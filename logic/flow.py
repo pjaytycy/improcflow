@@ -43,6 +43,9 @@ class Flow(object):
       dst = dst_element.get_connector(element.connection_model.dst_connector)
       element.set_src_dst(src, dst)
     
+  @classmethod
+  def get_all_saved_flows(cls):
+    return FlowModel.objects.all()
     
   def get_id(self):
     return self.flow_model.id

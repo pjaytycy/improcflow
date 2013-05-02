@@ -75,6 +75,10 @@ class Element(object):
   
   def delete(self):
     self.element_model.delete()
+
+  @classmethod
+  def get_all_saved_elements(cls):
+    return ElementModel.objects.all()
     
   def add_input_connector(self, title = None, data_types = None):
     input_connector = Connector(element = self, title = title, data_types = data_types)
@@ -167,6 +171,9 @@ class Connection(Element):
     else:
       self.connection_model = element_model.connectionmodel
   
+  @classmethod
+  def get_all_saved_connections(cls):
+    return ConnectionModel.objects.all()
   
   def set_flow(self, flow):
     super(Connection, self).set_flow(flow)
