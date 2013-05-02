@@ -1,4 +1,3 @@
 ------- ideas for further tests------------
-*) test removal of a standard element
 *) refactor "connection removed from DB" so Django API is not used anymore
 *) store values and & valid attribute of connectors

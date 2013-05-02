@@ -255,3 +255,39 @@ class FlowLogicTests(TestCase):
     
     # make sure the connection is really not in the database!
     self.assertEqual(2, len(ConnectionModel.objects.all()))
+  
+  
+  def test_remove_element_from_flow(self):
+   element_input = InputImage("test_input")
+   element_mean = OpenCVMean("test_mean")
+   element_output = OutputNumber("test_output")
+   
+   flow = Flow()
+   flow.add_element(element_input)
+   flow.add_element(element_mean)
+   flow.add_element(element_output)
+   flow.connect(element_input.image, element_mean.src, title = "connection1")
+   flow.connect(element_mean.mean, element_output.number, title = "connection2")
+   
+   element_input.set_value([[1, 2, 3, 4, 5], [6, 7, 8, 9, 10], [11, 12, 13, 14, 15]])
+   flow.run()
+   self.assertEqual(8, element_output.result())
+   
+   # make sure 3 elements + 2 connections are present in the flow object
+   self.assertEqual(5, flow.get_num_elements())
+   # make sure 2 connections are present in the DB
+   self.assertEqual(2, len(ConnectionModel.objects.all()))
+
+   flow.remove_element(element_mean)
+   
+   # make sure 2 elements + 0 connections are present in the flow object
+   self.assertEqual(2, flow.get_num_elements())
+   # make sure all connections are gone in the DB
+   self.assertEqual(0, len(ConnectionModel.objects.all()))
+   
+   # make sure the end result is invalid
+   self.assertEqual(None, element_output.result())
+   
+   
+   
+   

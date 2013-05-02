@@ -69,6 +69,30 @@ class Flow(object):
   def get_num_elements(self):
     return len(self.elements)
   
+  def remove_element(self, element):
+    # invalidate all the output connectors of this element + everything in this flow that depends on them
+    for invalid_connector in element.output_connectors:
+      self.invalidate(invalid_connector)
+    
+    # Remove the element from this flow object
+    self.elements.remove(element)
+    
+    # Remove the linked connections from this flow object
+    # We need to iterate over a copy of self.elements[], because items will be removed from it
+    for connection in self.elements[:]:
+      if not(isinstance(connection, Connection)):
+        continue
+      if connection.dst in element.input_connectors:
+        self.disconnect(connection)
+        continue
+      if connection.src in element.output_connectors:
+        self.disconnect(connection)
+        continue
+      
+    # Remove the element from the database
+    # The database will automatically be updated to also remove the connections linked to this element
+    element.delete()
+    
   def connect(self, src, dst, title = None):
     for element in self.elements:
       if not(isinstance(element, Connection)):
