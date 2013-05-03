@@ -50,6 +50,7 @@ class Element(object):
   def __init__(self, title = None, element_model = None):
     self.input_connectors = []
     self.output_connectors = []
+    self.flow_control = Connector(element = self, title = "flow_control")
     self.flow = None
     self.number_of_runs = 0
     if element_model is None:
