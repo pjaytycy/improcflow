@@ -134,7 +134,7 @@ class Flow(object):
     elements_done = 0
     for element in elements_to_do:
       if element.is_ready() and not element.is_done():
-        element.run()
+        element.run_or_block()
         elements_done += 1
       else:
         elements_left.append(element)
@@ -144,3 +144,9 @@ class Flow(object):
     
     return self.run(elements_left)
   
+
+  def debug_state(self):
+    print "==== FLOW : %s ====" % self.title
+    for element in self.elements:
+      element.debug_state()
+    print "==== ===="

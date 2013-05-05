@@ -5,6 +5,13 @@ ordered by:
 => real example from OpenCV docs as high as possible
 
 *) implement control-flow next to the data-flow
+  - flow_control = True
+  - flow_control = False
+  - flow_control = unknown
+  - flow_control = invalid
+  - is_blocked() propagation
+  - invalidate() due to connection changes
+  - conditional assignment
 *) implement Python arithmetic operators (, +, -, *, /, %, **, //)
 *) implement Python comparison operators (==, !=, >, <, >=, <=)
 *) implement Python logical operators (and, or, not)

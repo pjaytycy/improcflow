@@ -20,9 +20,13 @@ class Connector(object):
       self.valid = False
     else:
       self.valid = True
+    self.blocked = False
     self.element = element
     self.title = title
     self.data_types = data_types
+  
+  def debug_string(self):
+    return self.title + " : value = " + str(self.value) + ", valid = " + str(self.valid) + ", blocked = " + str(self.blocked)
     
   def set_value(self, value):
     if DEBUG:
@@ -31,7 +35,7 @@ class Connector(object):
     self.valid = True
   
   def invalidate(self):
-    # This function only invalidates this single connectors. If you 
+    # This function only invalidates this single connector. If you 
     # want to invalidate the full chain behind a connector, use:
     #    flow.invalidate(connector)
     
@@ -46,7 +50,14 @@ class Connector(object):
       
     return self.valid
 
+  def is_blocked(self):
+    return self.blocked
+  
+  def block(self):
+    self.blocked = True
+    self.valid = True
 
+    
 class Element(object):
   class_name = "element"
   
@@ -80,6 +91,19 @@ class Element(object):
   def delete(self):
     self.element_model.delete()
 
+  def debug_state(self):
+    print "  -- Element : %s : %s --" % (self.__class__.__name__, self.title)
+    print "  number_of_runs =", self.number_of_runs
+    print "  is_ready ?", self.is_ready()
+    print "  is_blocked ?", self.is_blocked()
+    print "  is_done ?", self.is_done()
+    print "  flow_control :", self.flow_control.debug_string()
+    for input_connector in self.input_connectors:
+      print "  input_connector :", input_connector.debug_string()
+    for output_connector in self.output_connectors:
+      print "  output_connector :", output_connector.debug_string()
+    print "  -- --"
+    
   @classmethod
   def get_all_saved_elements(cls):
     return ElementModel.objects.all()
@@ -135,7 +159,19 @@ class Element(object):
         result.append(output_connector)
         
     return result
-    
+  
+  
+  def run_or_block(self):
+    if self.is_blocked():
+      self.block()
+    else:
+      self.run()
+  
+  
+  def block(self):
+    for output_connector in self.output_connectors:
+      output_connector.block()
+      
     
   def run(self):
     self.number_of_runs += 1
@@ -145,8 +181,6 @@ class Element(object):
   
   def is_ready(self):
     if not(self.flow_control.is_ready()):
-      return False
-    if (self.flow_control.value != True):
       return False
       
     for input_connector in self.input_connectors:
@@ -160,7 +194,20 @@ class Element(object):
       if not(output_connector.is_ready()):
         return False
     return True
+  
+  
+  def is_blocked(self):
+    if self.flow_control.is_blocked():
+      return True
     
+    if self.flow_control.value == False:
+      return True
+    
+    for input_connector in self.input_connectors:
+      if input_connector.is_blocked():
+        return True
+    
+    return False
   
   def get_number_of_executions(self):
     return self.number_of_runs
@@ -213,4 +260,12 @@ class Connection(Element):
       print "  Connection %s from %s to %s" % (self.title, self.src.title, self.dst.title)
     self.dst.set_value(self.src.value)
 
+  
+  def block(self):
+    # exceptional case for a connection: even if src is "blocked", we still want to copy
+    # the data from src to dst, because we don't want a connection with different data on
+    # both ends of the line.
+    self.dst.set_value(self.src.value)
+    super(Connection, self).block()
+    
 register_element_type(Connection)
