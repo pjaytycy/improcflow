@@ -14,9 +14,12 @@ def get_class_for_element_type(class_name):
   
   
 class Connector(object):
-  def __init__(self, element, title = None, data_types = None):
-    self.value = None
-    self.valid = False
+  def __init__(self, element, title = None, data_types = None, default_value = None):
+    self.value = default_value
+    if default_value is None:
+      self.valid = False
+    else:
+      self.valid = True
     self.element = element
     self.title = title
     self.data_types = data_types
@@ -50,7 +53,7 @@ class Element(object):
   def __init__(self, title = None, element_model = None):
     self.input_connectors = []
     self.output_connectors = []
-    self.flow_control = Connector(element = self, title = "flow_control")
+    self.flow_control = Connector(element = self, title = "flow_control", default_value = True)
     self.flow = None
     self.number_of_runs = 0
     if element_model is None:
@@ -141,6 +144,11 @@ class Element(object):
     
   
   def is_ready(self):
+    if not(self.flow_control.is_ready()):
+      return False
+    if (self.flow_control.value != True):
+      return False
+      
     for input_connector in self.input_connectors:
       if not(input_connector.is_ready()):
         return False

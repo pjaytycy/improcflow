@@ -16,4 +16,5 @@ ordered by:
 *) implement list-access ([])
 *) recreate one of the OpenCV example programs: "squares.py"
 *) implement Python bitwise operators (&, |, ^, ~, <<, >>)
+*) remove duplicate code in InputImage / InputBoolean classes (maybe consolidate into 1 class)
 *) store values and & valid attribute of connectors

@@ -290,7 +290,7 @@ class BasicFlowLogicTests(TestCase):
    
    
 class ControlLogicTests(TestCase):
-  def test_with_fixed_true_control_signal(self):
+  def test_control_signal_true_allows_execution(self):
     element_input = InputImage(title = "element_input")
     element_input.set_value([[1, 2, 3], [4, 5, 6]])
     element_mean = OpenCVMean(title = "element_mean")
@@ -311,4 +311,31 @@ class ControlLogicTests(TestCase):
     expected = 3.5
     actual = element_output.result()
     self.assertEqual(expected, actual)
+  
+  
+  def test_control_signal_false_blocks_execution(self):
+    element_input = InputImage(title = "element_input")
+    element_input.set_value([[1, 2, 3], [4, 5, 6]])
+    element_mean = OpenCVMean(title = "element_mean")
+    element_output = OutputNumber(title = "element_output")
+    element_bool = InputBoolean(title = "element_bool")
+    element_bool.set_value(False)
     
+    flow = Flow()
+    flow.add_element(element_input)
+    flow.add_element(element_mean)
+    flow.add_element(element_bool)
+    flow.add_element(element_output)
+    flow.connect(element_input.image, element_mean.src, title = "data_connection_1")
+    flow.connect(element_mean.mean, element_output.number, title = "data_connection_2")
+    flow.connect(element_bool.boolean, element_mean.flow_control, title = "control_connection")
+    flow.run()
+    
+    expected = None
+    actual = element_output.result()
+    self.assertEqual(expected, actual)
+  
+  
+  # test_control_signal_unknown_blocks_execution
+  # test_control_signal_waiting_blocks_execution
+  
