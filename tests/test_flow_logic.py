@@ -19,9 +19,7 @@ class BasicFlowLogicTests(TestCase):
     flow.connect(element_mean.mean, element_output.number, title = "conn_2")
     flow.run()
     
-    expected = 3.5
-    actual = element_output.result()
-    self.assertEqual(expected, actual)
+    self.assertEqual(3.5, element_output.result())
   
   def test_mean_with_ndarray_4_to_9(self):
     element_input = InputImage()
@@ -37,9 +35,7 @@ class BasicFlowLogicTests(TestCase):
     flow.connect(element_mean.mean, element_output.number)
     flow.run()
     
-    expected = 6.5
-    actual = element_output.result()
-    self.assertEqual(expected, actual)
+    self.assertEqual(6.5, element_output.result())
     
   def test_mean_with_two_calls_to_run(self):
     element_input = InputImage(title = "element_input")
@@ -56,16 +52,12 @@ class BasicFlowLogicTests(TestCase):
     element_input.set_value([[1, 2, 3], [4, 5, 6]])
     flow.run()
     
-    expected = 3.5
-    actual = element_output.result()
-    self.assertEqual(expected, actual)
+    self.assertEqual(3.5, element_output.result())
     
     element_input.set_value([[7, 8, 9], [4, 5, 6]])
     flow.run()
     
-    expected = 6.5
-    actual = element_output.result()
-    self.assertEqual(expected, actual)
+    self.assertEqual(6.5, element_output.result())
   
   def test_mean_with_multiple_set_value_calls_before_calling_run(self):
     element_input = InputImage()
@@ -84,14 +76,11 @@ class BasicFlowLogicTests(TestCase):
     element_input.set_value([[3, 3], [5, 5]])
     flow.run()
     
-    expected = 4
-    actual = element_output.result()
-    self.assertEqual(expected, actual)
+    self.assertEqual(4, element_output.result())
     
     element_input.set_value([[1, 2, 3], [4, 5, 6]])
     
-    actual = element_output.result()
-    self.assertIsNone(actual)
+    self.assertIsNone(element_output.result())
   
   def test_change_flow_structure_between_two_calls_to_run(self):
     element_input_1 = InputImage(title = "element_input_1")
@@ -111,17 +100,13 @@ class BasicFlowLogicTests(TestCase):
     
     flow.run()
     
-    expected = 3.5
-    actual = element_output.result()
-    self.assertEqual(expected, actual)
+    self.assertEqual(3.5, element_output.result())
     
     flow.connect(element_input_2.image, element_mean.src, title = "conn_1b")
     
     flow.run()
     
-    expected = 6
-    actual = element_output.result()
-    self.assertEqual(expected, actual)
+    self.assertEqual(6, element_output.result())
     
     # also test for unnecessary executions
     self.assertEqual(1, element_input_1.get_number_of_executions())
@@ -133,12 +118,8 @@ class BasicFlowLogicTests(TestCase):
     flow_id = flow.get_id()
     flow2 = Flow(flow_id = flow_id)
     
-    expected = "test_flow"
-    actual = flow2.title
-    self.assertEqual(expected, actual)
-    expected = flow_id
-    actual = flow2.get_id()
-    self.assertEqual(expected, actual)
+    self.assertEqual("test_flow", flow2.title)
+    self.assertEqual(flow_id, flow2.get_id())
     
   def test_save_and_load_a_flow_with_one_element(self):
     flow1 = Flow(title = "test_flow_with_one_element")
@@ -147,19 +128,12 @@ class BasicFlowLogicTests(TestCase):
     
     flow2 = Flow(flow_id = flow_id)
     
-    expected = 1
-    actual = flow2.get_num_elements()
-    self.assertEqual(expected, actual)
+    self.assertEqual(1, flow2.get_num_elements())
     
     element = flow2.get_element("test_element")
     
-    expected = "test_element"
-    actual = element.title
-    self.assertEqual(expected, actual)
-    
-    expected = InputImage
-    actual = type(element)
-    self.assertEqual(expected, actual)
+    self.assertEqual("test_element", element.title)
+    self.assertEqual(InputImage, type(element))
     
   def test_save_and_load_a_flow_with_multiple_elements(self):
     flow1 = Flow()
@@ -284,7 +258,7 @@ class BasicFlowLogicTests(TestCase):
    self.assertEqual(0, len(Connection.get_all_saved_connections()))
    
    # make sure the end result is invalid
-   self.assertEqual(None, element_output.result())
+   self.assertIsNone(element_output.result())
    
    
    
@@ -308,13 +282,8 @@ class ControlLogicTests(TestCase):
     flow.connect(element_bool.boolean, element_mean.flow_control, title = "control_connection")
     flow.run()
     
-    expected = 3.5
-    actual = element_output.result()
-    self.assertEqual(expected, actual)
-    
-    expected = False
-    actual = element_mean.is_blocked()
-    self.assertEqual(expected, actual)
+    self.assertEqual(3.5, element_output.result())
+    self.assertEqual(False, element_mean.is_blocked())
   
   
   def test_control_signal_false_blocks_execution(self):
@@ -335,13 +304,8 @@ class ControlLogicTests(TestCase):
     flow.connect(element_bool.boolean, element_mean.flow_control, title = "control_connection")
     flow.run()
     
-    expected = None
-    actual = element_output.result()
-    self.assertEqual(expected, actual)
-    
-    expected = True
-    actual = element_mean.is_blocked()
-    self.assertEqual(expected, actual)
+    self.assertIsNone(element_output.result())
+    self.assertEqual(True, element_mean.is_blocked())
   
   
   def test_control_signal_blocked_blocks_execution(self):
@@ -363,13 +327,8 @@ class ControlLogicTests(TestCase):
     flow.connect(element_bool.boolean, element_mean.flow_control, title = "control_connection")
     flow.run()
     
-    expected = None
-    actual = element_output.result()
-    self.assertEqual(expected, actual)
-    
-    expected = True
-    actual = element_mean.is_blocked()
-    self.assertEqual(expected, actual)
+    self.assertIsNone(element_output.result())
+    self.assertEqual(True, element_mean.is_blocked())
   
   
   def test_control_signal_invalid_prevents_execution(self):
@@ -390,9 +349,7 @@ class ControlLogicTests(TestCase):
     flow.connect(element_bool.boolean, element_mean.flow_control, title = "control_connection")
     flow.run()
     
-    expected = None
-    actual = element_output.result()
-    self.assertEqual(expected, actual)
+    self.assertIsNone(element_output.result())
     
     # element_mean will not be "blocked", because untill the last moment we wait for the possibility for the
     # control flow signal to become valid. When that happens, we will know if we can run or need to block.
