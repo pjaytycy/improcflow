@@ -5,7 +5,6 @@ ordered by:
 => real example from OpenCV docs as high as possible
 
 *) implement control-flow next to the data-flow
-  - refactoring : remove the need to call super(..., self).run() in each run()
   - flow_control = invalid
   - is_blocked() propagation
   - invalidate() due to connection changes

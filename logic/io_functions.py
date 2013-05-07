@@ -16,7 +16,6 @@ class InputImage(Element):
       self.image.invalidate()
   
   def run(self):
-    super(InputImage, self).run()
     self.image.set_value(self.dummy.value)
     
 register_element_type(InputImage)
@@ -38,7 +37,6 @@ class InputBoolean(Element):
       self.boolean.invalidate()
   
   def run(self):
-    super(InputBoolean, self).run()
     self.boolean.set_value(self.dummy.value)
 
 register_element_type(InputBoolean)

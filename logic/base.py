@@ -165,6 +165,9 @@ class Element(object):
     if self.is_blocked():
       self.block()
     else:
+      self.number_of_runs += 1
+      if DEBUG:
+        print "%s %s run (# %d)" % (self.__class__.__name__, self.title, self.number_of_runs)
       self.run()
   
   
@@ -173,12 +176,6 @@ class Element(object):
       output_connector.block()
       
     
-  def run(self):
-    self.number_of_runs += 1
-    if DEBUG:
-      print "%s %s run (# %d)" % (self.__class__.__name__, self.title, self.number_of_runs)
-    
-  
   def is_ready(self):
     if not(self.flow_control.is_ready()):
       return False
@@ -255,7 +252,6 @@ class Connection(Element):
     
         
   def run(self):
-    super(Connection, self).run()
     if DEBUG:
       print "  Connection %s from %s to %s" % (self.title, self.src.title, self.dst.title)
     self.dst.set_value(self.src.value)

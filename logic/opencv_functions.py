@@ -12,7 +12,6 @@ class OpenCVMean(Element):
     self.mean = self.add_output_connector(title = "mean")
     
   def run(self):
-    super(OpenCVMean, self).run()
     avg_list = cv2.mean(self.src.value)
     self.mean.set_value(avg_list[0])
     
