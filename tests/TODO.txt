@@ -5,7 +5,7 @@ ordered by:
 => real example from OpenCV docs as high as possible
 
 *) implement control-flow next to the data-flow
-  - flow_control = invalid
+  - refactor assertEqual() arguments to be more descriptive than (expected, actual)
   - is_blocked() propagation
   - invalidate() due to connection changes
   - conditional assignment

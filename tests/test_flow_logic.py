@@ -350,7 +350,8 @@ class ControlLogicTests(TestCase):
     element_mean = OpenCVMean(title = "element_mean")
     element_output = OutputNumber(title = "element_output")
     element_bool = InputBoolean(title = "element_bool")
-    element_bool.block()
+    element_bool.set_value(True)    # assign the value True, which would normally allow to continue
+    element_bool.block()            # but mark the element as blocked, which prevents propagation
     
     flow = Flow()
     flow.add_element(element_input)
@@ -369,6 +370,36 @@ class ControlLogicTests(TestCase):
     expected = True
     actual = element_mean.is_blocked()
     self.assertEqual(expected, actual)
-        
-  # test_control_signal_waiting_blocks_execution
+  
+  
+  def test_control_signal_invalid_prevents_execution(self):
+    element_input = InputImage(title = "element_input")
+    element_input.set_value([[1, 2, 3], [4, 5, 6]])
+    element_mean = OpenCVMean(title = "element_mean")
+    element_output = OutputNumber(title = "element_output")
+    element_bool = InputBoolean(title = "element_bool")
+    # not assigning any value makes the connector "invalid"
+    
+    flow = Flow()
+    flow.add_element(element_input)
+    flow.add_element(element_mean)
+    flow.add_element(element_bool)
+    flow.add_element(element_output)
+    flow.connect(element_input.image, element_mean.src, title = "data_connection_1")
+    flow.connect(element_mean.mean, element_output.number, title = "data_connection_2")
+    flow.connect(element_bool.boolean, element_mean.flow_control, title = "control_connection")
+    flow.run()
+    
+    expected = None
+    actual = element_output.result()
+    self.assertEqual(expected, actual)
+    
+    # element_mean will not be "blocked", because untill the last moment we wait for the possibility for the
+    # control flow signal to become valid. When that happens, we will know if we can run or need to block.
+    # As this does not happen here, the element will never be ready or blocked.
+    self.assertEqual(False, element_mean.is_blocked())
+    self.assertEqual(False, element_mean.is_ready())
+    self.assertEqual(False, element_mean.is_done())
+    self.assertEqual(0, element_mean.get_number_of_executions())
+  
   # test_data_signal_blocked_blocks_execution
