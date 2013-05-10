@@ -109,12 +109,15 @@ class Flow(object):
     connection.set_flow(self)
     connection.set_src_dst(src, dst)
     self.elements.append(connection)
+    return connection
   
   def disconnect(self, connection):
     self.elements.remove(connection)
-    self.invalidate(connection.dst)
+    needs_invalidate = connection.dst.default()
+    if needs_invalidate:
+      self.invalidate(connection.dst)
+    connection.dst.default()  # need to set default *after* invalidate()
     connection.delete()
-  
   
   def invalidate(self, invalid_connector):
     invalid_connector.invalidate()
@@ -124,7 +127,6 @@ class Flow(object):
         new_invalid_connectors = element.invalidate(invalid_connector)
         for new_invalid_connector in new_invalid_connectors:
           self.invalidate(new_invalid_connector)
-          
   
   def run(self, elements_to_do = None):
     if elements_to_do is None:

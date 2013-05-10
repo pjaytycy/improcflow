@@ -6,8 +6,11 @@ ordered by:
 
 *) implement control-flow next to the data-flow
   - invalidate() due to connection changes
+      # invalidate control connection (not disconnect) ==> invalidate mean & result
+      # disconnect control connection which was True ==> no changes in invalidate/control signal
   - conditional assignment
-  
+  - allow to use None as default value
+  - disconnecting an input_connector without default value should make the element not runnable
 *) implement Python arithmetic operators (, +, -, *, /, %, **, //)
 *) implement Python comparison operators (==, !=, >, <, >=, <=)
 *) implement Python logical operators (and, or, not)

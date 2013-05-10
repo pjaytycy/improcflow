@@ -15,25 +15,43 @@ def get_class_for_element_type(class_name):
   
 class Connector(object):
   def __init__(self, element, title = None, data_types = None, default_value = None):
-    self.value = default_value
-    if default_value is None:
-      self.valid = False
-    else:
-      self.valid = True
+    self.default_value = default_value
+    self.value = None
+    self.valid = False
     self.blocked = False
     self.element = element
     self.title = title
     self.data_types = data_types
+    
+    if default_value is not None:
+      self.default()
   
   def debug_string(self):
     return self.title + " : value = " + str(self.value) + ", valid = " + str(self.valid) + ", blocked = " + str(self.blocked)
     
   def set_value(self, value):
     if DEBUG:
-      print "%s %s %s set_value" % (self.__class__.__name__, self.element.title, self.title)
+      try:
+        element_title = self.element.title
+      except AttributeError:
+        element_title = ""      
+      print "%s %s %s set_value" % (self.__class__.__name__, element_title, self.title)
     self.value = convert_data(value, self.data_types)
     self.valid = True
   
+  def default(self):
+    if DEBUG:
+      try:
+        element_title = self.element.title
+      except AttributeError:
+        element_title = ""      
+      print "%s %s %s default()" % (self.__class__.__name__, element_title, self.title)
+      print "            value =", self.value
+      print "    default_value =", self.default_value
+    needs_invalidate = not(self.value == self.default_value)
+    self.set_value(self.default_value)
+    return needs_invalidate
+    
   def invalidate(self):
     # This function only invalidates this single connector. If you 
     # want to invalidate the full chain behind a connector, use:
@@ -64,7 +82,7 @@ class Element(object):
   def __init__(self, title = None, element_model = None):
     self.input_connectors = []
     self.output_connectors = []
-    self.flow_control = Connector(element = self, title = "flow_control", default_value = True)
+    self.flow_control = self.add_input_connector(title = "flow_control", default_value = True)
     self.flow = None
     self.number_of_runs = 0
     if element_model is None:
@@ -97,7 +115,6 @@ class Element(object):
     print "  is_ready ?", self.is_ready()
     print "  is_blocked ?", self.is_blocked()
     print "  is_done ?", self.is_done()
-    print "  flow_control :", self.flow_control.debug_string()
     for input_connector in self.input_connectors:
       print "  input_connector :", input_connector.debug_string()
     for output_connector in self.output_connectors:
@@ -108,8 +125,8 @@ class Element(object):
   def get_all_saved_elements(cls):
     return ElementModel.objects.all()
     
-  def add_input_connector(self, title = None, data_types = None):
-    input_connector = Connector(element = self, title = title, data_types = data_types)
+  def add_input_connector(self, title = None, data_types = None, default_value = None):
+    input_connector = Connector(element = self, title = title, data_types = data_types, default_value = default_value)
     self.input_connectors.append(input_connector)
     return input_connector
   
@@ -177,9 +194,6 @@ class Element(object):
       
     
   def is_ready(self):
-    if not(self.flow_control.is_ready()):
-      return False
-      
     for input_connector in self.input_connectors:
       if not(input_connector.is_ready()):
         return False
@@ -194,9 +208,6 @@ class Element(object):
   
   
   def is_blocked(self):
-    if self.flow_control.is_blocked():
-      return True
-    
     if self.flow_control.value == False:
       return True
     
