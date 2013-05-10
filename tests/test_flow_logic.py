@@ -411,4 +411,29 @@ class ControlLogicTests(TestCase):
     flow.run()
     self.assertEqual(False, element_mean.is_blocked())
     self.assertEqual(3.5, element_output.result())
+
+  def test_disconnect_control_connection_which_was_True(self):
+    element_input = InputImage(title = "element_input")
+    element_input.set_value([[1, 2, 3], [4, 5, 6]])
+    element_mean = OpenCVMean(title = "element_mean")
+    element_output = OutputNumber(title = "element_output")
+    element_bool = InputBoolean(title = "element_bool")
+    element_bool.set_value(True)
+    
+    flow = Flow()
+    flow.add_element(element_input)
+    flow.add_element(element_mean)
+    flow.add_element(element_bool)
+    flow.add_element(element_output)
+    flow.connect(element_input.image, element_mean.src, title = "data_connection_1")
+    flow.connect(element_mean.mean, element_output.number, title = "data_connection_2")
+    control_connection = flow.connect(element_bool.boolean, element_mean.flow_control, title = "control_connection")
+    
+    flow.run()
+    self.assertEqual(False, element_mean.is_blocked())
+    self.assertEqual(3.5, element_output.result())
+
+    flow.disconnect(control_connection)
+    self.assertEqual(False, element_mean.is_blocked())
+    self.assertEqual(3.5, element_output.result())
     
