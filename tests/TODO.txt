@@ -5,8 +5,6 @@ ordered by:
 => real example from OpenCV docs as high as possible
 
 *) implement control-flow next to the data-flow
-  - invalidate() due to connection changes
-      # invalidate control connection (not disconnect) ==> invalidate mean & result
   - conditional assignment
   - allow to use None as default value
   - disconnecting an input_connector without default value should make the element not runnable
