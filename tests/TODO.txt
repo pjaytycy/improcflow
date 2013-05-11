@@ -5,9 +5,9 @@ ordered by:
 => real example from OpenCV docs as high as possible
 
 *) implement control-flow next to the data-flow
-  - conditional assignment
-  - allow to use None as default value
   - disconnecting an input_connector without default value should make the element not runnable
+  - disconnection an input_connector with default value == None should let the element run normally
+  - conditional assignment
 *) implement Python arithmetic operators (, +, -, *, /, %, **, //)
 *) implement Python comparison operators (==, !=, >, <, >=, <=)
 *) implement Python logical operators (and, or, not)

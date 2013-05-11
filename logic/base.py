@@ -14,43 +14,58 @@ def get_class_for_element_type(class_name):
   
   
 class Connector(object):
-  def __init__(self, element, title = None, data_types = None, default_value = None):
-    self.default_value = default_value
-    self.value = None
-    self.valid = False
+  def __init__(self, element, title = None, data_types = None, **kwargs):
     self.blocked = False
     self.element = element
     self.title = title
     self.data_types = data_types
     
-    if default_value is not None:
-      self.default()
+    if 'default_value' in kwargs:
+      self.default_value = kwargs['default_value']
+      self.has_default = True
+    else:
+      self.has_default = False
+
+    self.default()
   
   def debug_string(self):
     return self.title + " : value = " + str(self.value) + ", valid = " + str(self.valid) + ", blocked = " + str(self.blocked)
+
+  def get_element_title(self):
+    try:
+      element_title = self.element.title
+    except AttributeError:
+      element_title = ""
+    return element_title
     
   def set_value(self, value):
     if DEBUG:
-      try:
-        element_title = self.element.title
-      except AttributeError:
-        element_title = ""      
-      print "%s %s %s set_value" % (self.__class__.__name__, element_title, self.title)
+      print "%s %s %s set_value" % (self.__class__.__name__, self.get_element_title(), self.title)
     self.value = convert_data(value, self.data_types)
     self.valid = True
-  
-  def default(self):
+
+    
+  def default_needs_invalidate(self):
     if DEBUG:
-      try:
-        element_title = self.element.title
-      except AttributeError:
-        element_title = ""      
-      print "%s %s %s default()" % (self.__class__.__name__, element_title, self.title)
+      print "%s %s %s default_needs_invalidate()" % (self.__class__.__name__, self.get_element_title(), self.title)
       print "            value =", self.value
-      print "    default_value =", self.default_value
-    needs_invalidate = not(self.value == self.default_value)
-    self.set_value(self.default_value)
-    return needs_invalidate
+      print "      has_default =", self.has_default
+      if self.has_default:
+        print "    default_value =", self.default_value
+
+    if not self.has_default:
+      return True
+    
+    return not(self.value == self.default_value)
+    
+    
+  def default(self):
+    if not self.has_default:
+      self.value = None
+      self.valid = False
+    else:
+      self.set_value(self.default_value)
+    
     
   def invalidate(self):
     # This function only invalidates this single connector. If you 
@@ -125,13 +140,13 @@ class Element(object):
   def get_all_saved_elements(cls):
     return ElementModel.objects.all()
     
-  def add_input_connector(self, title = None, data_types = None, default_value = None):
-    input_connector = Connector(element = self, title = title, data_types = data_types, default_value = default_value)
+  def add_input_connector(self, **kwargs):
+    input_connector = Connector(element = self, **kwargs)
     self.input_connectors.append(input_connector)
     return input_connector
   
-  def add_output_connector(self, title = None):
-    output_connector = Connector(element = self, title = title)
+  def add_output_connector(self, **kwargs):
+    output_connector = Connector(element = self, **kwargs)
     self.output_connectors.append(output_connector)
     return output_connector
   

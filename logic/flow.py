@@ -113,7 +113,7 @@ class Flow(object):
   
   def disconnect(self, connection):
     self.elements.remove(connection)
-    needs_invalidate = connection.dst.default()
+    needs_invalidate = connection.dst.default_needs_invalidate()
     if needs_invalidate:
       self.invalidate(connection.dst)
     connection.dst.default()  # need to set default *after* invalidate()
