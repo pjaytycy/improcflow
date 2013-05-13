@@ -656,3 +656,36 @@ class DefaultValueTests(TestCase):
     flow.disconnect(connection_5)
     self.assertEqual(3.5, element_output.result())
 
+
+
+class PythonArithmeticTests(TestCase):
+  def test_adding_integers(self):
+    element_input_1 = InputData()
+    element_input_2 = InputData()
+    element_add = PythonAddition()
+    element_output = OutputData()
+    
+    flow = Flow()
+    flow.add_element(element_input_1)
+    flow.add_element(element_input_2)
+    flow.add_element(element_add)
+    flow.add_element(element_output)
+    flow.connect(element_input_1.data, element_add.term1)
+    flow.connect(element_input_2.data, element_add.term2)
+    flow.connect(element_add.sum, element_output.data)
+    
+    element_input_1.set_value(3)
+    element_input_2.set_value(5)
+    flow.run()
+    self.assertEqual(8, element_output.result())
+    
+    element_input_1.set_value(-3)
+    flow.run()
+    self.assertEqual(2, element_output.result())
+    
+    element_input_2.set_value(0)
+    flow.run()
+    self.assertEqual(-3, element_output.result())
+    
+    
+    
