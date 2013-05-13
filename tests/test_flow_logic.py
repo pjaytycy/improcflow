@@ -770,3 +770,31 @@ class PythonArithmeticTests(TestCase):
     element_input_2.set_value(-0.1)
     flow.run()
     self.assertEqual(30, element_output.result())
+  
+  def test_modulo_operation_with_integers(self):
+    element_input_1 = InputData()
+    element_input_2 = InputData()
+    element_mod = PythonModulo()
+    element_output = OutputData()
+    
+    flow = Flow()
+    flow.add_element(element_input_1)
+    flow.add_element(element_input_2)
+    flow.add_element(element_mod)
+    flow.add_element(element_output)
+    flow.connect(element_input_1.data, element_mod.dividend)
+    flow.connect(element_input_2.data, element_mod.divisor)
+    flow.connect(element_mod.remainder, element_output.data)
+    
+    element_input_1.set_value(3)
+    element_input_2.set_value(5)
+    flow.run()
+    self.assertEqual(3, element_output.result())
+    
+    element_input_1.set_value(-3)
+    flow.run()
+    self.assertEqual(2, element_output.result())
+    
+    element_input_2.set_value(-2)
+    flow.run()
+    self.assertEqual(-1, element_output.result())
