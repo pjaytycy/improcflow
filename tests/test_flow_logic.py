@@ -508,3 +508,27 @@ class ControlLogicTests(TestCase):
     
     flow.run()
     self.assertEqual(14.0, element_output.result())
+
+    
+  def test_disconnect_input_connector_without_default_value(self):
+    element_input = InputImage(title = "element_input")
+    element_input.set_value([[1, 2, 3], [4, 5, 6]])
+    element_mean = OpenCVMean(title = "element_mean")
+    element_output = OutputNumber(title = "element_output")
+    
+    flow = Flow()
+    flow.add_element(element_input)
+    flow.add_element(element_mean)
+    flow.add_element(element_output)
+    connection_data_1 = flow.connect(element_input.image, element_mean.src, title = "data_connection_1")
+    connection_data_2 = flow.connect(element_mean.mean, element_output.number, title = "data_connection_2")
+    
+    flow.run()
+    self.assertEqual(3.5, element_output.result())
+    
+    flow.disconnect(connection_data_1)
+    self.assertIsNone(element_output.result())
+    self.assertEqual(False, element_mean.is_ready())
+  
+  
+  
