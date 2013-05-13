@@ -715,4 +715,32 @@ class PythonArithmeticTests(TestCase):
     flow.run()
     self.assertEqual(-3, element_output.result())
     
+  def test_multiplying_integers(self):
+    element_input_1 = InputData()
+    element_input_2 = InputData()
+    element_mul = PythonMultiplication()
+    element_output = OutputData()
+    
+    flow = Flow()
+    flow.add_element(element_input_1)
+    flow.add_element(element_input_2)
+    flow.add_element(element_mul)
+    flow.add_element(element_output)
+    flow.connect(element_input_1.data, element_mul.factor1)
+    flow.connect(element_input_2.data, element_mul.factor2)
+    flow.connect(element_mul.product, element_output.data)
+    
+    element_input_1.set_value(3)
+    element_input_2.set_value(5)
+    flow.run()
+    self.assertEqual(15, element_output.result())
+    
+    element_input_1.set_value(-3)
+    flow.run()
+    self.assertEqual(-15, element_output.result())
+    
+    element_input_2.set_value(0)
+    flow.run()
+    self.assertEqual(0, element_output.result())
+    
     
