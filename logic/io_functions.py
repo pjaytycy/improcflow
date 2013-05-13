@@ -41,6 +41,28 @@ class InputBoolean(Element):
 
 register_element_type(InputBoolean)
 
+
+class InputNumber(Element):
+  class_name = "input_number"
+  
+  def __init__(self, title = None, element_model = None):
+    super(InputNumber, self).__init__(title = title, element_model = element_model)
+    self.dummy = self.add_input_connector(title = "dummy")
+    self.number = self.add_output_connector(title = "number")
+  
+  def set_value(self, src):
+    self.dummy.set_value(src)
+    if self.flow:
+      self.flow.invalidate(self.number)
+    else:
+      self.number.invalidate()
+  
+  def run(self):
+    self.number.set_value(self.dummy.value)
+
+register_element_type(InputNumber)
+
+
 class OutputNumber(Element):
   class_name = "output_number"
   
