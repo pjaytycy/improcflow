@@ -1,78 +1,37 @@
 from improcflow.logic import Element, register_element_type
 
-class InputImage(Element):
-  class_name = "input_image"
+class InputData(Element):
+  class_name = "input_data"
   
   def __init__(self, title = None, element_model = None):
-    super(InputImage, self).__init__(title = title, element_model = element_model)
+    super(InputData, self).__init__(title = title, element_model = element_model)
     self.dummy = self.add_input_connector(title = "dummy")
-    self.image = self.add_output_connector(title = "image")
+    self.data = self.add_output_connector(title = "data")
 
   def set_value(self, src):
     self.dummy.set_value(src)
     if self.flow:
-      self.flow.invalidate(self.image)
+      self.flow.invalidate(self.data)
     else:
-      self.image.invalidate()
+      self.data.invalidate()
   
   def run(self):
-    self.image.set_value(self.dummy.value)
+    self.data.set_value(self.dummy.value)
     
-register_element_type(InputImage)
+register_element_type(InputData)
 
 
-class InputBoolean(Element):
-  class_name = "input_boolean"
+
+class OutputData(Element):
+  class_name = "output_data"
   
   def __init__(self, title = None, element_model = None):
-    super(InputBoolean, self).__init__(title = title, element_model = element_model)
-    self.dummy = self.add_input_connector(title = "dummy")
-    self.boolean = self.add_output_connector(title = "boolean")
-  
-  def set_value(self, src):
-    self.dummy.set_value(src)
-    if self.flow:
-      self.flow.invalidate(self.boolean)
-    else:
-      self.boolean.invalidate()
-  
-  def run(self):
-    self.boolean.set_value(self.dummy.value)
-
-register_element_type(InputBoolean)
-
-
-class InputNumber(Element):
-  class_name = "input_number"
-  
-  def __init__(self, title = None, element_model = None):
-    super(InputNumber, self).__init__(title = title, element_model = element_model)
-    self.dummy = self.add_input_connector(title = "dummy")
-    self.number = self.add_output_connector(title = "number")
-  
-  def set_value(self, src):
-    self.dummy.set_value(src)
-    if self.flow:
-      self.flow.invalidate(self.number)
-    else:
-      self.number.invalidate()
-  
-  def run(self):
-    self.number.set_value(self.dummy.value)
-
-register_element_type(InputNumber)
-
-
-class OutputNumber(Element):
-  class_name = "output_number"
-  
-  def __init__(self, title = None, element_model = None):
-    super(OutputNumber, self).__init__(title = title, element_model = element_model)
-    self.number = self.add_input_connector(title = "number")
+    super(OutputData, self).__init__(title = title, element_model = element_model)
+    self.data = self.add_input_connector(title = "data")
       
   def result(self):
     if self.is_ready():
-      return self.number.value
+      return self.data.value
     return None
     
-register_element_type(OutputNumber)
+register_element_type(OutputData)

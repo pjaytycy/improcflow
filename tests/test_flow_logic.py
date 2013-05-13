@@ -6,48 +6,48 @@ from improcflow.logic import *
 
 class BasicFlowLogicTests(TestCase):
   def test_mean_with_ndarray_1_to_6(self):
-    element_input = InputImage(title = "element_input")
+    element_input = InputData(title = "element_input")
     element_input.set_value([[1, 2, 3], [4, 5, 6]])
     element_mean = OpenCVMean(title = "element_mean")
-    element_output = OutputNumber(title = "element_output")
+    element_output = OutputData(title = "element_output")
     
     flow = Flow()
     flow.add_element(element_input)
     flow.add_element(element_mean)
     flow.add_element(element_output)
-    flow.connect(element_input.image, element_mean.src, title = "conn_1")
-    flow.connect(element_mean.mean, element_output.number, title = "conn_2")
+    flow.connect(element_input.data, element_mean.src, title = "conn_1")
+    flow.connect(element_mean.mean, element_output.data, title = "conn_2")
     flow.run()
     
     self.assertEqual(3.5, element_output.result())
   
   def test_mean_with_ndarray_4_to_9(self):
-    element_input = InputImage()
+    element_input = InputData()
     element_input.set_value([[4, 5, 6], [7, 8, 9]])
     element_mean = OpenCVMean()
-    element_output = OutputNumber()
+    element_output = OutputData()
     
     flow = Flow()
     flow.add_element(element_input)
     flow.add_element(element_mean)
     flow.add_element(element_output)
-    flow.connect(element_input.image, element_mean.src)
-    flow.connect(element_mean.mean, element_output.number)
+    flow.connect(element_input.data, element_mean.src)
+    flow.connect(element_mean.mean, element_output.data)
     flow.run()
     
     self.assertEqual(6.5, element_output.result())
     
   def test_mean_with_two_calls_to_run(self):
-    element_input = InputImage(title = "element_input")
+    element_input = InputData(title = "element_input")
     element_mean = OpenCVMean(title = "element_mean")
-    element_output = OutputNumber(title = "element_output")
+    element_output = OutputData(title = "element_output")
     
     flow = Flow()
     flow.add_element(element_input)
     flow.add_element(element_mean)
     flow.add_element(element_output)
-    flow.connect(element_input.image, element_mean.src, title = "conn_1")
-    flow.connect(element_mean.mean, element_output.number, title = "conn_2")
+    flow.connect(element_input.data, element_mean.src, title = "conn_1")
+    flow.connect(element_mean.mean, element_output.data, title = "conn_2")
 
     element_input.set_value([[1, 2, 3], [4, 5, 6]])
     flow.run()
@@ -60,16 +60,16 @@ class BasicFlowLogicTests(TestCase):
     self.assertEqual(6.5, element_output.result())
   
   def test_mean_with_multiple_set_value_calls_before_calling_run(self):
-    element_input = InputImage()
+    element_input = InputData()
     element_mean = OpenCVMean()
-    element_output = OutputNumber()
+    element_output = OutputData()
     
     flow = Flow()
     flow.add_element(element_input)
     flow.add_element(element_mean)
     flow.add_element(element_output)
-    flow.connect(element_input.image, element_mean.src)
-    flow.connect(element_mean.mean, element_output.number)
+    flow.connect(element_input.data, element_mean.src)
+    flow.connect(element_mean.mean, element_output.data)
     
     element_input.set_value([[1, 1], [3, 3]])
     element_input.set_value([[2, 2], [4, 4]])
@@ -83,26 +83,26 @@ class BasicFlowLogicTests(TestCase):
     self.assertIsNone(element_output.result())
   
   def test_change_flow_structure_between_two_calls_to_run(self):
-    element_input_1 = InputImage(title = "element_input_1")
+    element_input_1 = InputData(title = "element_input_1")
     element_input_1.set_value([[1, 2, 3], [4, 5, 6]])
-    element_input_2 = InputImage(title = "element_input_2")
+    element_input_2 = InputData(title = "element_input_2")
     element_input_2.set_value([[4, 5], [7, 8]])
     element_mean = OpenCVMean(title = "element_mean")
-    element_output = OutputNumber(title = "element_output")
+    element_output = OutputData(title = "element_output")
     
     flow = Flow()
     flow.add_element(element_input_1)
     flow.add_element(element_input_2)
     flow.add_element(element_mean)
     flow.add_element(element_output)
-    flow.connect(element_input_1.image, element_mean.src, title = "conn_1a")
-    flow.connect(element_mean.mean, element_output.number, title = "conn_2")
+    flow.connect(element_input_1.data, element_mean.src, title = "conn_1a")
+    flow.connect(element_mean.mean, element_output.data, title = "conn_2")
     
     flow.run()
     
     self.assertEqual(3.5, element_output.result())
     
-    flow.connect(element_input_2.image, element_mean.src, title = "conn_1b")
+    flow.connect(element_input_2.data, element_mean.src, title = "conn_1b")
     
     flow.run()
     
@@ -123,7 +123,7 @@ class BasicFlowLogicTests(TestCase):
     
   def test_save_and_load_a_flow_with_one_element(self):
     flow1 = Flow(title = "test_flow_with_one_element")
-    flow1.add_element(InputImage("test_element"))
+    flow1.add_element(InputData("test_element"))
     flow_id = flow1.get_id()
     
     flow2 = Flow(flow_id = flow_id)
@@ -133,14 +133,14 @@ class BasicFlowLogicTests(TestCase):
     element = flow2.get_element("test_element")
     
     self.assertEqual("test_element", element.title)
-    self.assertEqual(InputImage, type(element))
+    self.assertEqual(InputData, type(element))
     
   def test_save_and_load_a_flow_with_multiple_elements(self):
     flow1 = Flow()
-    flow1.add_element(InputImage("test_input_image_1"))
-    flow1.add_element(InputImage("test_input_image_2"))
+    flow1.add_element(InputData("test_input_image_1"))
+    flow1.add_element(InputData("test_input_image_2"))
     flow1.add_element(OpenCVMean("test_opencv_mean"))
-    flow1.add_element(OutputNumber("test_output_number"))
+    flow1.add_element(OutputData("test_output_number"))
     
     flow_id = flow1.get_id()
     
@@ -149,11 +149,11 @@ class BasicFlowLogicTests(TestCase):
     
     element = flow2.get_element("test_input_image_1")
     self.assertEqual("test_input_image_1", element.title)
-    self.assertEqual(InputImage, type(element))
+    self.assertEqual(InputData, type(element))
     
     element = flow2.get_element("test_input_image_2")
     self.assertEqual("test_input_image_2", element.title)
-    self.assertEqual(InputImage, type(element))
+    self.assertEqual(InputData, type(element))
     
     element = flow2.get_element("test_opencv_mean")
     self.assertEqual("test_opencv_mean", element.title)
@@ -161,19 +161,19 @@ class BasicFlowLogicTests(TestCase):
     
     element = flow2.get_element("test_output_number")
     self.assertEqual("test_output_number", element.title)
-    self.assertEqual(OutputNumber, type(element))
+    self.assertEqual(OutputData, type(element))
     
   def test_save_and_load_a_flow_with_connections(self):
-    element_input = InputImage("test_input")
+    element_input = InputData("test_input")
     element_mean = OpenCVMean()
-    element_output = OutputNumber("test_output")
+    element_output = OutputData("test_output")
     
     flow = Flow()
     flow.add_element(element_input)
     flow.add_element(element_mean)
     flow.add_element(element_output)
-    flow.connect(element_input.image, element_mean.src)
-    flow.connect(element_mean.mean, element_output.number)
+    flow.connect(element_input.data, element_mean.src)
+    flow.connect(element_mean.mean, element_output.data)
     
     flow_id = flow.get_id()
     
@@ -186,16 +186,16 @@ class BasicFlowLogicTests(TestCase):
     self.assertEqual(2, element_output2.result())
 
   def test_change_structure_after_save_and_load_database(self):
-    element_input = InputImage("test_input1")
+    element_input = InputData("test_input1")
     element_mean = OpenCVMean("test_mean")
-    element_output = OutputNumber("test_output")
+    element_output = OutputData("test_output")
     
     flow = Flow()
     flow.add_element(element_input)
     flow.add_element(element_mean)
     flow.add_element(element_output)
-    flow.connect(element_input.image, element_mean.src, title = "connection1")
-    flow.connect(element_mean.mean, element_output.number, title = "connection2")
+    flow.connect(element_input.data, element_mean.src, title = "connection1")
+    flow.connect(element_mean.mean, element_output.data, title = "connection2")
     
     element_input.set_value([[3, 4], [6, 7]])
     flow.run()
@@ -208,10 +208,10 @@ class BasicFlowLogicTests(TestCase):
     connection1 = flow2.get_element("connection1")
     self.assertIsNotNone(connection1)
     
-    element_input2 = InputImage("test_input2")
+    element_input2 = InputData("test_input2")
     flow2.add_element(element_input2)
     element_mean2 = flow2.get_element("test_mean")
-    flow2.connect(element_input2.image, element_mean2.src, title = "connection3")
+    flow2.connect(element_input2.data, element_mean2.src, title = "connection3")
     
     element_input2.set_value([[1, 2], [4, 5]])
     flow2.run()
@@ -230,16 +230,16 @@ class BasicFlowLogicTests(TestCase):
     self.assertEqual(2, len(Connection.get_all_saved_connections()))
   
   def test_remove_element_from_flow(self):
-   element_input = InputImage("test_input")
+   element_input = InputData("test_input")
    element_mean = OpenCVMean("test_mean")
-   element_output = OutputNumber("test_output")
+   element_output = OutputData("test_output")
    
    flow = Flow()
    flow.add_element(element_input)
    flow.add_element(element_mean)
    flow.add_element(element_output)
-   flow.connect(element_input.image, element_mean.src, title = "connection1")
-   flow.connect(element_mean.mean, element_output.number, title = "connection2")
+   flow.connect(element_input.data, element_mean.src, title = "connection1")
+   flow.connect(element_mean.mean, element_output.data, title = "connection2")
    
    element_input.set_value([[1, 2, 3, 4, 5], [6, 7, 8, 9, 10], [11, 12, 13, 14, 15]])
    flow.run()
@@ -265,11 +265,11 @@ class BasicFlowLogicTests(TestCase):
    
 class ControlLogicTests(TestCase):
   def test_control_signal_true_allows_execution(self):
-    element_input = InputImage(title = "element_input")
+    element_input = InputData(title = "element_input")
     element_input.set_value([[1, 2, 3], [4, 5, 6]])
     element_mean = OpenCVMean(title = "element_mean")
-    element_output = OutputNumber(title = "element_output")
-    element_bool = InputBoolean(title = "element_bool")
+    element_output = OutputData(title = "element_output")
+    element_bool = InputData(title = "element_bool")
     element_bool.set_value(True)
     
     flow = Flow()
@@ -277,9 +277,9 @@ class ControlLogicTests(TestCase):
     flow.add_element(element_mean)
     flow.add_element(element_bool)
     flow.add_element(element_output)
-    flow.connect(element_input.image, element_mean.src, title = "data_connection_1")
-    flow.connect(element_mean.mean, element_output.number, title = "data_connection_2")
-    flow.connect(element_bool.boolean, element_mean.flow_control, title = "control_connection")
+    flow.connect(element_input.data, element_mean.src, title = "data_connection_1")
+    flow.connect(element_mean.mean, element_output.data, title = "data_connection_2")
+    flow.connect(element_bool.data, element_mean.flow_control, title = "control_connection")
     flow.run()
     
     self.assertEqual(3.5, element_output.result())
@@ -287,11 +287,11 @@ class ControlLogicTests(TestCase):
   
   
   def test_control_signal_false_blocks_execution(self):
-    element_input = InputImage(title = "element_input")
+    element_input = InputData(title = "element_input")
     element_input.set_value([[1, 2, 3], [4, 5, 6]])
     element_mean = OpenCVMean(title = "element_mean")
-    element_output = OutputNumber(title = "element_output")
-    element_bool = InputBoolean(title = "element_bool")
+    element_output = OutputData(title = "element_output")
+    element_bool = InputData(title = "element_bool")
     element_bool.set_value(False)
     
     flow = Flow()
@@ -299,9 +299,9 @@ class ControlLogicTests(TestCase):
     flow.add_element(element_mean)
     flow.add_element(element_bool)
     flow.add_element(element_output)
-    flow.connect(element_input.image, element_mean.src, title = "data_connection_1")
-    flow.connect(element_mean.mean, element_output.number, title = "data_connection_2")
-    flow.connect(element_bool.boolean, element_mean.flow_control, title = "control_connection")
+    flow.connect(element_input.data, element_mean.src, title = "data_connection_1")
+    flow.connect(element_mean.mean, element_output.data, title = "data_connection_2")
+    flow.connect(element_bool.data, element_mean.flow_control, title = "control_connection")
     flow.run()
     
     self.assertIsNone(element_output.result())
@@ -309,11 +309,11 @@ class ControlLogicTests(TestCase):
   
   
   def test_control_signal_blocked_blocks_execution(self):
-    element_input = InputImage(title = "element_input")
+    element_input = InputData(title = "element_input")
     element_input.set_value([[1, 2, 3], [4, 5, 6]])
     element_mean = OpenCVMean(title = "element_mean")
-    element_output = OutputNumber(title = "element_output")
-    element_bool = InputBoolean(title = "element_bool")
+    element_output = OutputData(title = "element_output")
+    element_bool = InputData(title = "element_bool")
     element_bool.set_value(True)    # assign the value True, which would normally allow to continue
     element_bool.block()            # but mark the element as blocked, which prevents propagation
     
@@ -322,9 +322,9 @@ class ControlLogicTests(TestCase):
     flow.add_element(element_mean)
     flow.add_element(element_bool)
     flow.add_element(element_output)
-    flow.connect(element_input.image, element_mean.src, title = "data_connection_1")
-    flow.connect(element_mean.mean, element_output.number, title = "data_connection_2")
-    flow.connect(element_bool.boolean, element_mean.flow_control, title = "control_connection")
+    flow.connect(element_input.data, element_mean.src, title = "data_connection_1")
+    flow.connect(element_mean.mean, element_output.data, title = "data_connection_2")
+    flow.connect(element_bool.data, element_mean.flow_control, title = "control_connection")
     flow.run()
     
     self.assertIsNone(element_output.result())
@@ -332,11 +332,11 @@ class ControlLogicTests(TestCase):
   
   
   def test_control_signal_invalid_prevents_execution(self):
-    element_input = InputImage(title = "element_input")
+    element_input = InputData(title = "element_input")
     element_input.set_value([[1, 2, 3], [4, 5, 6]])
     element_mean = OpenCVMean(title = "element_mean")
-    element_output = OutputNumber(title = "element_output")
-    element_bool = InputBoolean(title = "element_bool")
+    element_output = OutputData(title = "element_output")
+    element_bool = InputData(title = "element_bool")
     # not assigning any value makes the connector "invalid"
     
     flow = Flow()
@@ -344,9 +344,9 @@ class ControlLogicTests(TestCase):
     flow.add_element(element_mean)
     flow.add_element(element_bool)
     flow.add_element(element_output)
-    flow.connect(element_input.image, element_mean.src, title = "data_connection_1")
-    flow.connect(element_mean.mean, element_output.number, title = "data_connection_2")
-    flow.connect(element_bool.boolean, element_mean.flow_control, title = "control_connection")
+    flow.connect(element_input.data, element_mean.src, title = "data_connection_1")
+    flow.connect(element_mean.mean, element_output.data, title = "data_connection_2")
+    flow.connect(element_bool.data, element_mean.flow_control, title = "control_connection")
     flow.run()
     
     self.assertIsNone(element_output.result())
@@ -360,10 +360,10 @@ class ControlLogicTests(TestCase):
     self.assertEqual(0, element_mean.get_number_of_executions())
   
   def test_data_signal_blocked_blocks_execution(self):
-    element_input = InputImage(title = "element_input")
+    element_input = InputData(title = "element_input")
     element_input.set_value([[1, 2, 3], [4, 5, 6]])
     element_mean = OpenCVMean(title = "element_mean")
-    element_output = OutputNumber(title = "element_output")
+    element_output = OutputData(title = "element_output")
  
     element_input.block()
     
@@ -371,8 +371,8 @@ class ControlLogicTests(TestCase):
     flow.add_element(element_input)
     flow.add_element(element_mean)
     flow.add_element(element_output)
-    flow.connect(element_input.image, element_mean.src, title = "data_connection_1")
-    flow.connect(element_mean.mean, element_output.number, title = "data_connection_2")
+    flow.connect(element_input.data, element_mean.src, title = "data_connection_1")
+    flow.connect(element_mean.mean, element_output.data, title = "data_connection_2")
     flow.run()
     
     self.assertIsNone(element_output.result())
@@ -385,11 +385,11 @@ class ControlLogicTests(TestCase):
 # disconnect control connection which was True ==> no changes in invalidate/control signal
 
   def test_disconnect_control_connection_which_was_False(self):
-    element_input = InputImage(title = "element_input")
+    element_input = InputData(title = "element_input")
     element_input.set_value([[1, 2, 3], [4, 5, 6]])
     element_mean = OpenCVMean(title = "element_mean")
-    element_output = OutputNumber(title = "element_output")
-    element_bool = InputBoolean(title = "element_bool")
+    element_output = OutputData(title = "element_output")
+    element_bool = InputData(title = "element_bool")
     element_bool.set_value(False)
     
     flow = Flow()
@@ -397,9 +397,9 @@ class ControlLogicTests(TestCase):
     flow.add_element(element_mean)
     flow.add_element(element_bool)
     flow.add_element(element_output)
-    flow.connect(element_input.image, element_mean.src, title = "data_connection_1")
-    flow.connect(element_mean.mean, element_output.number, title = "data_connection_2")
-    control_connection = flow.connect(element_bool.boolean, element_mean.flow_control, title = "control_connection")
+    flow.connect(element_input.data, element_mean.src, title = "data_connection_1")
+    flow.connect(element_mean.mean, element_output.data, title = "data_connection_2")
+    control_connection = flow.connect(element_bool.data, element_mean.flow_control, title = "control_connection")
     
     flow.run()
     self.assertIsNone(element_output.result())
@@ -413,11 +413,11 @@ class ControlLogicTests(TestCase):
     self.assertEqual(3.5, element_output.result())
 
   def test_disconnect_control_connection_which_was_True(self):
-    element_input = InputImage(title = "element_input")
+    element_input = InputData(title = "element_input")
     element_input.set_value([[1, 2, 3], [4, 5, 6]])
     element_mean = OpenCVMean(title = "element_mean")
-    element_output = OutputNumber(title = "element_output")
-    element_bool = InputBoolean(title = "element_bool")
+    element_output = OutputData(title = "element_output")
+    element_bool = InputData(title = "element_bool")
     element_bool.set_value(True)
     
     flow = Flow()
@@ -425,9 +425,9 @@ class ControlLogicTests(TestCase):
     flow.add_element(element_mean)
     flow.add_element(element_bool)
     flow.add_element(element_output)
-    flow.connect(element_input.image, element_mean.src, title = "data_connection_1")
-    flow.connect(element_mean.mean, element_output.number, title = "data_connection_2")
-    control_connection = flow.connect(element_bool.boolean, element_mean.flow_control, title = "control_connection")
+    flow.connect(element_input.data, element_mean.src, title = "data_connection_1")
+    flow.connect(element_mean.mean, element_output.data, title = "data_connection_2")
+    control_connection = flow.connect(element_bool.data, element_mean.flow_control, title = "control_connection")
     
     flow.run()
     self.assertEqual(False, element_mean.is_blocked())
@@ -438,11 +438,11 @@ class ControlLogicTests(TestCase):
     self.assertEqual(3.5, element_output.result())
   
   def test_invalidate_control_connection(self):
-    element_input = InputImage(title = "element_input")
+    element_input = InputData(title = "element_input")
     element_input.set_value([[1, 2, 3], [4, 5, 6]])
     element_mean = OpenCVMean(title = "element_mean")
-    element_output = OutputNumber(title = "element_output")
-    element_bool = InputBoolean(title = "element_bool")
+    element_output = OutputData(title = "element_output")
+    element_bool = InputData(title = "element_bool")
     element_bool.set_value(True)
     
     flow = Flow()
@@ -450,9 +450,9 @@ class ControlLogicTests(TestCase):
     flow.add_element(element_mean)
     flow.add_element(element_bool)
     flow.add_element(element_output)
-    flow.connect(element_input.image, element_mean.src, title = "data_connection_1")
-    flow.connect(element_mean.mean, element_output.number, title = "data_connection_2")
-    control_connection = flow.connect(element_bool.boolean, element_mean.flow_control, title = "control_connection")
+    flow.connect(element_input.data, element_mean.src, title = "data_connection_1")
+    flow.connect(element_mean.mean, element_output.data, title = "data_connection_2")
+    control_connection = flow.connect(element_bool.data, element_mean.flow_control, title = "control_connection")
     
     flow.run()
     self.assertEqual(False, element_mean.is_blocked())
@@ -486,20 +486,20 @@ class ControlLogicTests(TestCase):
                   
     register_element_type(MockElement)
 
-    element_input = InputImage(title = "element_input")
+    element_input = InputData(title = "element_input")
     element_input.set_value([[1, 2, 3], [4, 5, 6]])
     element_mean = OpenCVMean(title = "element_mean")
     element_mock = MockElement(title = "element_mock")
-    element_output = OutputNumber(title = "element_output")
+    element_output = OutputData(title = "element_output")
     
     flow = Flow()
     flow.add_element(element_input)
     flow.add_element(element_mean)
     flow.add_element(element_mock)
     flow.add_element(element_output)
-    flow.connect(element_input.image, element_mean.src, title = "data_connection_1")
+    flow.connect(element_input.data, element_mean.src, title = "data_connection_1")
     flow.connect(element_mean.mean, element_mock.src, title = "data_connection_2")
-    flow.connect(element_mock.dst, element_output.number, title = "data_connection_3")
+    flow.connect(element_mock.dst, element_output.data, title = "data_connection_3")
     
     flow.run()
     self.assertEqual(3.5, element_output.result())
@@ -511,17 +511,17 @@ class ControlLogicTests(TestCase):
 
     
   def test_disconnect_input_connector_without_default_value(self):
-    element_input = InputImage(title = "element_input")
+    element_input = InputData(title = "element_input")
     element_input.set_value([[1, 2, 3], [4, 5, 6]])
     element_mean = OpenCVMean(title = "element_mean")
-    element_output = OutputNumber(title = "element_output")
+    element_output = OutputData(title = "element_output")
     
     flow = Flow()
     flow.add_element(element_input)
     flow.add_element(element_mean)
     flow.add_element(element_output)
-    connection_data_1 = flow.connect(element_input.image, element_mean.src, title = "data_connection_1")
-    connection_data_2 = flow.connect(element_mean.mean, element_output.number, title = "data_connection_2")
+    connection_data_1 = flow.connect(element_input.data, element_mean.src, title = "data_connection_1")
+    connection_data_2 = flow.connect(element_mean.mean, element_output.data, title = "data_connection_2")
     
     flow.run()
     self.assertEqual(3.5, element_output.result())
@@ -553,13 +553,13 @@ class ControlLogicTests(TestCase):
                   
     register_element_type(MockElement)
 
-    element_input = InputImage(title = "element_input")
+    element_input = InputData(title = "element_input")
     element_input.set_value([[1, 2, 3], [4, 5, 6]])
-    element_input2 = InputNumber(title = "element_input_2")
+    element_input2 = InputData(title = "element_input_2")
     element_input2.set_value("blah")
     element_mean = OpenCVMean(title = "element_mean")
     element_mock = MockElement(title = "element_mock")
-    element_output = OutputNumber(title = "element_output")
+    element_output = OutputData(title = "element_output")
     
     flow = Flow()
     flow.add_element(element_input)
@@ -567,16 +567,16 @@ class ControlLogicTests(TestCase):
     flow.add_element(element_mean)
     flow.add_element(element_mock)
     flow.add_element(element_output)
-    connection_1 = flow.connect(element_input.image, element_mean.src, title = "data_connection_1")
+    connection_1 = flow.connect(element_input.data, element_mean.src, title = "data_connection_1")
     connection_2 = flow.connect(element_mean.mean, element_mock.src, title = "data_connection_2")
-    connection_3 = flow.connect(element_mock.dst, element_output.number, title = "data_connection_3")
+    connection_3 = flow.connect(element_mock.dst, element_output.data, title = "data_connection_3")
     
     # 1) run with element_mock.mock not connected, ie: default = None
     flow.run()
     self.assertEqual(3.5, element_output.result())
 
     # 2) connect element_mock.mock to a value != None; this should invalidate everything, then rerun it.
-    connection_4 = flow.connect(element_input2.number, element_mock.mock, title = "mock_connection")
+    connection_4 = flow.connect(element_input2.data, element_mock.mock, title = "mock_connection")
     self.assertIsNone(element_output.result())
     
     flow.run()
@@ -591,7 +591,7 @@ class ControlLogicTests(TestCase):
     
     # 4) connect element_mock.mock to a value = None; this could leave everything valid or invalidate everything. It is not so important.
     element_input2.set_value(None)
-    connection_5 = flow.connect(element_input2.number, element_mock.mock, title = "mock_connection")
+    connection_5 = flow.connect(element_input2.data, element_mock.mock, title = "mock_connection")
     flow.run()
     
     # 5) disconnecting should leave everything valid
