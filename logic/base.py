@@ -43,6 +43,7 @@ class Connector(object):
       print "%s %s %s set_value" % (self.__class__.__name__, self.get_element_title(), self.title)
     self.value = convert_data(value, self.data_types)
     self.valid = True
+    self.blocked = False
 
     
   def default_needs_invalidate(self):

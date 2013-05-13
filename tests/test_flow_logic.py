@@ -464,6 +464,64 @@ class ControlLogicTests(TestCase):
     self.assertEqual(False, element_mean.is_done())
     self.assertIsNone(element_output.result())
   
+  def test_conditional_assignment(self):
+    element_input_A = InputData(title = "element_input_A")
+    element_input_A.set_value([[1, 3, 5], [7, 9, 11]])
+    element_input_B = InputData(title = "element_input_B")
+    element_input_B.set_value([[2, 4, 6], [8, 10, 12]])
+    element_input_A_enable = InputData(title = "element_input_A_enable")
+    element_input_B_enable = InputData(title = "element_input_B_enable")
+    element_cond_assign = ConditionalAssignment(title = "element_cond_assign")
+    element_mean = OpenCVMean(title = "element_mean")
+    element_output = OutputData(title = "element_output")
+    
+    flow = Flow()
+    flow.add_element(element_input_A)
+    flow.add_element(element_input_B)
+    flow.add_element(element_input_A_enable)
+    flow.add_element(element_input_B_enable)
+    flow.add_element(element_cond_assign)
+    flow.add_element(element_mean)
+    flow.add_element(element_output)
+    
+    flow.connect(element_input_A_enable.data, element_input_A.flow_control)
+    flow.connect(element_input_B_enable.data, element_input_B.flow_control)
+    flow.connect(element_input_A.data, element_cond_assign.next_input())
+    flow.connect(element_input_B.data, element_cond_assign.next_input())
+    flow.connect(element_cond_assign.output, element_mean.src)
+    flow.connect(element_mean.mean, element_output.data)
+    
+    # 1) undefined
+    flow.run()
+    self.assertIsNone(element_output.result())
+    
+    # 2) choose element A
+    element_input_A_enable.set_value(True)
+    element_input_B_enable.set_value(False)
+    flow.run()
+    self.assertEqual(6, element_output.result())
+    
+    # 3) choose element B
+    element_input_A_enable.set_value(False)
+    element_input_B_enable.set_value(True)
+    flow.run()
+    self.assertEqual(7, element_output.result())
+    
+    # 4) enable both
+    element_input_A_enable.set_value(True)
+    element_input_B_enable.set_value(True)
+    flow.run()
+    self.assertIsNone(element_output.result())
+    
+    # 5) disable both
+    element_input_A_enable.set_value(False)
+    element_input_B_enable.set_value(False)
+    flow.run()
+    self.assertIsNone(element_output.result())
+    
+    
+  
+class DefaultValueTests(TestCase):
   def test_allow_default_None(self):
     class MockElement(Element):
       class_name = "test_allow_default_None_mock"

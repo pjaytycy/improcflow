@@ -30,7 +30,7 @@ class OutputData(Element):
     self.data = self.add_input_connector(title = "data")
       
   def result(self):
-    if self.is_ready():
+    if self.is_ready() and not self.is_blocked():
       return self.data.value
     return None
     

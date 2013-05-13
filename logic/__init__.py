@@ -5,5 +5,6 @@ from flow import Flow, ElementNotFoundError
 
 # the files imported below should only reference the classes / functions explicitly imported above
 
+from control_flow import *
 from opencv_functions import *
 from io_functions import *

@@ -4,8 +4,6 @@ ordered by:
 => no dependencies on items lower in the list
 => real example from OpenCV docs as high as possible
 
-*) implement control-flow next to the data-flow
-  - conditional assignment
 *) implement Python arithmetic operators (, +, -, *, /, %, **, //)
 *) implement Python comparison operators (==, !=, >, <, >=, <=)
 *) implement Python logical operators (and, or, not)
@@ -17,5 +15,5 @@ ordered by:
 *) implement list-access ([])
 *) recreate one of the OpenCV example programs: "squares.py"
 *) implement Python bitwise operators (&, |, ^, ~, <<, >>)
-*) remove duplicate code in InputImage / InputBoolean classes (maybe consolidate into 1 class)
 *) store values and & valid attribute of connectors
+*) add "flow" parameter in element constructors, to prevent the "flow.add_element()" statements
