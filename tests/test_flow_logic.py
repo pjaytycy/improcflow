@@ -743,4 +743,30 @@ class PythonArithmeticTests(TestCase):
     flow.run()
     self.assertEqual(0, element_output.result())
     
+  def test_dividing_integers_with_true_division(self):
+    element_input_1 = InputData()
+    element_input_2 = InputData()
+    element_div = PythonTrueDivision()
+    element_output = OutputData()
     
+    flow = Flow()
+    flow.add_element(element_input_1)
+    flow.add_element(element_input_2)
+    flow.add_element(element_div)
+    flow.add_element(element_output)
+    flow.connect(element_input_1.data, element_div.dividend)
+    flow.connect(element_input_2.data, element_div.divisor)
+    flow.connect(element_div.quotient, element_output.data)
+    
+    element_input_1.set_value(3)
+    element_input_2.set_value(5)
+    flow.run()
+    self.assertEqual(0.6, element_output.result())
+    
+    element_input_1.set_value(-3)
+    flow.run()
+    self.assertEqual(-0.6, element_output.result())
+    
+    element_input_2.set_value(-0.1)
+    flow.run()
+    self.assertEqual(30, element_output.result())
