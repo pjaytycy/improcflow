@@ -12,6 +12,7 @@ from control_flow import *
 
 # elements for standard Python 
 from python_arithmetic import *
+from python_comparison import *
 
 # elements for Python libraries
 from opencv_functions import *
