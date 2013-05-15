@@ -5,6 +5,13 @@ from flow import Flow, ElementNotFoundError
 
 # the files imported below should only reference the classes / functions explicitly imported above
 
-from control_flow import *
-from opencv_functions import *
+
+# special elements for improcflow
 from io_functions import *
+from control_flow import *
+
+# elements for standard Python 
+from python_arithmetic import *
+
+# elements for Python libraries
+from opencv_functions import *
