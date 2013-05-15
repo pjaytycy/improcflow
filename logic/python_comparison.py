@@ -34,3 +34,13 @@ class PythonIsGreaterThan(PythonComparisonBase):
     self.result.set_value(self.left.value > self.right.value)
     
 register_element_type(PythonIsGreaterThan)
+
+
+class PythonIsLowerThan(PythonComparisonBase):
+  class_name = "python_is_lower_than"
+  
+  def run(self):
+    self.result.set_value(self.left.value < self.right.value)
+    
+register_element_type(PythonIsLowerThan)
+
