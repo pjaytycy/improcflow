@@ -795,9 +795,16 @@ class PythonArithmeticTests(TestCase):
     flow.run()
     self.assertEqual(2, element_output.result())
     
-    element_input_2.set_value(-2)
+    element_input_2.set_value(-0.1)
     flow.run()
-    self.assertEqual(-1, element_output.result())
+    # due to rounding -3 / -0.1 returns 29.9999999999999999
+    # for floor division this means: 29
+    # for modulo this means: -0.1 * 29 + M = -3.0 <=> M = -0.1
+    # however on machines without the rounding problem, the 
+    # division result might be 30.0, which would result in
+    # a modulo of 0.0
+
+    self.assertIn(round(element_output.result(), 7), (-0.1, 0.0))
   
   def test_exponentiation_with_integers(self):
     element_input_1 = InputData()
@@ -827,3 +834,34 @@ class PythonArithmeticTests(TestCase):
     flow.run()
     self.assertEqual(1.0/9, element_output.result())
 
+  def test_dividing_integers_with_floor_division(self):
+    element_input_1 = InputData()
+    element_input_2 = InputData()
+    element_div = PythonFloorDivision()
+    element_output = OutputData()
+    
+    flow = Flow()
+    flow.add_element(element_input_1)
+    flow.add_element(element_input_2)
+    flow.add_element(element_div)
+    flow.add_element(element_output)
+    flow.connect(element_input_1.data, element_div.dividend)
+    flow.connect(element_input_2.data, element_div.divisor)
+    flow.connect(element_div.quotient, element_output.data)
+    
+    element_input_1.set_value(3)
+    element_input_2.set_value(5)
+    flow.run()
+    self.assertEqual(0, element_output.result())
+    
+    element_input_1.set_value(-3)
+    flow.run()
+    self.assertEqual(-1, element_output.result())
+    
+    element_input_2.set_value(-0.1)
+    flow.run()
+    # due to rounding -3 / -0.1 returns 29.9999999999999999
+    # for floor division this means: 29
+    # however on machines without the rounding problem, the result might be 30.0
+    self.assertIn(element_output.result(), (29, 30))
+  
