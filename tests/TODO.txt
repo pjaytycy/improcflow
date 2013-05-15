@@ -4,7 +4,6 @@ ordered by:
 => no dependencies on items lower in the list
 => real example from OpenCV docs as high as possible
 
-*) implement Python arithmetic operators (, +, -, *, /, %, **, //)
 *) implement Python comparison operators (==, !=, >, <, >=, <=)
 *) implement Python logical operators (and, or, not)
 *) implement sub-routines
@@ -17,3 +16,8 @@ ordered by:
 *) implement Python bitwise operators (&, |, ^, ~, <<, >>)
 *) store values and & valid attribute of connectors
 *) add "flow" parameter in element constructors, to prevent the "flow.add_element()" statements
+*) implement exceptions and warnings, for example:
+    - Divide-by-zero
+    - OpenCV exceptions
+    - conditional assignment undefined
+    
