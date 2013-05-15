@@ -798,3 +798,32 @@ class PythonArithmeticTests(TestCase):
     element_input_2.set_value(-2)
     flow.run()
     self.assertEqual(-1, element_output.result())
+  
+  def test_exponentiation_with_integers(self):
+    element_input_1 = InputData()
+    element_input_2 = InputData()
+    element_pow = PythonExponentiation()
+    element_output = OutputData()
+    
+    flow = Flow()
+    flow.add_element(element_input_1)
+    flow.add_element(element_input_2)
+    flow.add_element(element_pow)
+    flow.add_element(element_output)
+    flow.connect(element_input_1.data, element_pow.base)
+    flow.connect(element_input_2.data, element_pow.exponent)
+    flow.connect(element_pow.power, element_output.data)
+    
+    element_input_1.set_value(3)
+    element_input_2.set_value(5)
+    flow.run()
+    self.assertEqual(243, element_output.result())
+    
+    element_input_1.set_value(-3)
+    flow.run()
+    self.assertEqual(-243, element_output.result())
+    
+    element_input_2.set_value(-2)
+    flow.run()
+    self.assertEqual(1.0/9, element_output.result())
+
