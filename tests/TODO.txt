@@ -4,7 +4,6 @@ ordered by:
 => no dependencies on items lower in the list
 => real example from OpenCV docs as high as possible
 
-*) implement Python comparison operators (==, !=, >, <, >=, <=)
 *) implement Python logical operators (and, or, not)
 *) implement sub-routines
 *) implement or simulate for-loops (map, reduce, zip, append, extend)
@@ -20,4 +19,5 @@ ordered by:
     - Divide-by-zero
     - OpenCV exceptions
     - conditional assignment undefined
-    
+    - define element with same class_name as an other element
+    - try to run PythonComparisonBase, which has no run() function
