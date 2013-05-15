@@ -140,20 +140,20 @@ class PythonComparisonTests(TestCase):
     flow.run()
     self.assertFalse(element_output.result())
 
-  def test_lower_with_integers(self):
+  def test_less_with_integers(self):
     element_input_1 = InputData()
     element_input_2 = InputData()
-    element_lower = PythonIsLowerThan()
+    element_less = PythonIsLessThan()
     element_output = OutputData()
     
     flow = Flow()
     flow.add_element(element_input_1)
     flow.add_element(element_input_2)
-    flow.add_element(element_lower)
+    flow.add_element(element_less)
     flow.add_element(element_output)
-    flow.connect(element_input_1.data, element_lower.left)
-    flow.connect(element_input_2.data, element_lower.right)
-    flow.connect(element_lower.result, element_output.data)
+    flow.connect(element_input_1.data, element_less.left)
+    flow.connect(element_input_2.data, element_less.right)
+    flow.connect(element_less.result, element_output.data)
     
     element_input_1.set_value(3)
     element_input_2.set_value(5)

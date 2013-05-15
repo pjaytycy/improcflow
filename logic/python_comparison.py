@@ -36,13 +36,13 @@ class PythonIsGreaterThan(PythonComparisonBase):
 register_element_type(PythonIsGreaterThan)
 
 
-class PythonIsLowerThan(PythonComparisonBase):
-  class_name = "python_is_lower_than"
+class PythonIsLessThan(PythonComparisonBase):
+  class_name = "python_is_less_than"
   
   def run(self):
     self.result.set_value(self.left.value < self.right.value)
     
-register_element_type(PythonIsLowerThan)
+register_element_type(PythonIsLessThan)
 
 
 class PythonIsNotLessThan(PythonComparisonBase):
