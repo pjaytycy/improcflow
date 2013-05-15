@@ -25,3 +25,12 @@ class PythonIsNotEqualTo(PythonComparisonBase):
     self.result.set_value(self.left.value != self.right.value)
     
 register_element_type(PythonIsNotEqualTo)
+
+
+class PythonIsGreaterThan(PythonComparisonBase):
+  class_name = "python_is_greater_than"
+  
+  def run(self):
+    self.result.set_value(self.left.value > self.right.value)
+    
+register_element_type(PythonIsGreaterThan)
