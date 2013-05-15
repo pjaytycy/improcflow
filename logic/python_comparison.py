@@ -52,3 +52,12 @@ class PythonIsNotLessThan(PythonComparisonBase):
     self.result.set_value(self.left.value >= self.right.value)
     
 register_element_type(PythonIsNotLessThan)
+
+
+class PythonIsNotGreaterThan(PythonComparisonBase):
+  class_name = "python_is_not_greater_than"
+  
+  def run(self):
+    self.result.set_value(self.left.value <= self.right.value)
+    
+register_element_type(PythonIsNotGreaterThan)
