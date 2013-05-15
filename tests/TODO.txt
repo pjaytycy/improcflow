@@ -4,7 +4,6 @@ ordered by:
 => no dependencies on items lower in the list
 => real example from OpenCV docs as high as possible
 
-*) implement Python arithmetic operators (+, -, *, /, %, **, //)
 *) implement Python comparison operators (==, !=, >, <, >=, <=)
 *) implement Python logical operators (and, or, not)
 *) implement sub-routines
