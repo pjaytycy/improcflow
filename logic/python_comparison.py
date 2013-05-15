@@ -44,3 +44,11 @@ class PythonIsLowerThan(PythonComparisonBase):
     
 register_element_type(PythonIsLowerThan)
 
+
+class PythonIsNotLessThan(PythonComparisonBase):
+  class_name = "python_is_not_less_than"
+  
+  def run(self):
+    self.result.set_value(self.left.value >= self.right.value)
+    
+register_element_type(PythonIsNotLessThan)
