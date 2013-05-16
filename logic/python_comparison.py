@@ -71,3 +71,12 @@ class PythonAnd(PythonComparisonBase):
     
 register_element_type(PythonAnd)
 
+
+class PythonOr(PythonComparisonBase):
+  class_name = "python_or"
+  
+  def run(self):
+    self.result.set_value(self.left.value or self.right.value)
+    
+register_element_type(PythonOr)
+

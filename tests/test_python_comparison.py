@@ -312,3 +312,39 @@ class PythonLogialTests(TestCase):
     flow.run()
     self.assertFalse(element_output.result())
 
+    
+  def test_or_with_booleans(self):
+    element_input_1 = InputData()
+    element_input_2 = InputData()
+    element_or = PythonOr()
+    element_output = OutputData()
+    
+    flow = Flow()
+    flow.add_element(element_input_1)
+    flow.add_element(element_input_2)
+    flow.add_element(element_or)
+    flow.add_element(element_output)
+    flow.connect(element_input_1.data, element_or.left)
+    flow.connect(element_input_2.data, element_or.right)
+    flow.connect(element_or.result, element_output.data)
+    
+    element_input_1.set_value(True)
+    element_input_2.set_value(True)
+    flow.run()
+    self.assertTrue(element_output.result())
+    
+    element_input_1.set_value(True)
+    element_input_2.set_value(False)
+    flow.run()
+    self.assertTrue(element_output.result())
+    
+    element_input_1.set_value(False)
+    element_input_2.set_value(True)
+    flow.run()
+    self.assertTrue(element_output.result())
+    
+    element_input_1.set_value(False)
+    element_input_2.set_value(False)
+    flow.run()
+    self.assertFalse(element_output.result())
+
