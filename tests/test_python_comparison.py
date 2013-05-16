@@ -274,4 +274,98 @@ class PythonComparisonTests(TestCase):
     element_input_2.set_value(0)
     flow.run()
     self.assertTrue(element_output.result())
-        
+
+
+class PythonLogialTests(TestCase):
+  def test_and_with_booleans(self):
+    element_input_1 = InputData()
+    element_input_2 = InputData()
+    element_and = PythonAnd()
+    element_output = OutputData()
+    
+    flow = Flow()
+    flow.add_element(element_input_1)
+    flow.add_element(element_input_2)
+    flow.add_element(element_and)
+    flow.add_element(element_output)
+    flow.connect(element_input_1.data, element_and.left)
+    flow.connect(element_input_2.data, element_and.right)
+    flow.connect(element_and.result, element_output.data)
+    
+    element_input_1.set_value(True)
+    element_input_2.set_value(True)
+    flow.run()
+    self.assertTrue(element_output.result())
+    
+    element_input_1.set_value(True)
+    element_input_2.set_value(False)
+    flow.run()
+    self.assertFalse(element_output.result())
+    
+    element_input_1.set_value(False)
+    element_input_2.set_value(True)
+    flow.run()
+    self.assertFalse(element_output.result())
+    
+    element_input_1.set_value(False)
+    element_input_2.set_value(False)
+    flow.run()
+    self.assertFalse(element_output.result())
+
+    
+  def test_or_with_booleans(self):
+    element_input_1 = InputData()
+    element_input_2 = InputData()
+    element_or = PythonOr()
+    element_output = OutputData()
+    
+    flow = Flow()
+    flow.add_element(element_input_1)
+    flow.add_element(element_input_2)
+    flow.add_element(element_or)
+    flow.add_element(element_output)
+    flow.connect(element_input_1.data, element_or.left)
+    flow.connect(element_input_2.data, element_or.right)
+    flow.connect(element_or.result, element_output.data)
+    
+    element_input_1.set_value(True)
+    element_input_2.set_value(True)
+    flow.run()
+    self.assertTrue(element_output.result())
+    
+    element_input_1.set_value(True)
+    element_input_2.set_value(False)
+    flow.run()
+    self.assertTrue(element_output.result())
+    
+    element_input_1.set_value(False)
+    element_input_2.set_value(True)
+    flow.run()
+    self.assertTrue(element_output.result())
+    
+    element_input_1.set_value(False)
+    element_input_2.set_value(False)
+    flow.run()
+    self.assertFalse(element_output.result())
+
+
+  def test_not_with_boolean(self):
+    element_input = InputData()
+    element_not = PythonNot()
+    element_output = OutputData()
+    
+    flow = Flow()
+    flow.add_element(element_input)
+    flow.add_element(element_not)
+    flow.add_element(element_output)
+    flow.connect(element_input.data, element_not.input)
+    flow.connect(element_not.result, element_output.data)
+    
+    element_input.set_value(True)
+    flow.run()
+    self.assertFalse(element_output.result())
+    
+    element_input.set_value(False)
+    flow.run()
+    self.assertTrue(element_output.result())
+    

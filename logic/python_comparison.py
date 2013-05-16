@@ -61,3 +61,36 @@ class PythonIsNotGreaterThan(PythonComparisonBase):
     self.result.set_value(self.left.value <= self.right.value)
     
 register_element_type(PythonIsNotGreaterThan)
+
+
+class PythonAnd(PythonComparisonBase):
+  class_name = "python_and"
+  
+  def run(self):
+    self.result.set_value(self.left.value and self.right.value)
+    
+register_element_type(PythonAnd)
+
+
+class PythonOr(PythonComparisonBase):
+  class_name = "python_or"
+  
+  def run(self):
+    self.result.set_value(self.left.value or self.right.value)
+    
+register_element_type(PythonOr)
+
+
+class PythonNot(Element):
+  class_name = "python_not"
+  
+  def __init__(self, title = None, element_model = None):
+    super(PythonNot, self).__init__(title = title, element_model = element_model)
+    self.input = self.add_input_connector(title = "input")
+    self.result = self.add_output_connector(title = "result")
+  
+  def run(self):
+    self.result.set_value(not(self.input.value))
+    
+register_element_type(PythonNot)
+    
