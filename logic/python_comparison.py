@@ -80,3 +80,17 @@ class PythonOr(PythonComparisonBase):
     
 register_element_type(PythonOr)
 
+
+class PythonNot(Element):
+  class_name = "python_not"
+  
+  def __init__(self, title = None, element_model = None):
+    super(PythonNot, self).__init__(title = title, element_model = element_model)
+    self.input = self.add_input_connector(title = "input")
+    self.result = self.add_output_connector(title = "result")
+  
+  def run(self):
+    self.result.set_value(not(self.input.value))
+    
+register_element_type(PythonNot)
+    

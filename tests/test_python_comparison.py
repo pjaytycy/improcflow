@@ -348,3 +348,24 @@ class PythonLogialTests(TestCase):
     flow.run()
     self.assertFalse(element_output.result())
 
+
+  def test_not_with_boolean(self):
+    element_input = InputData()
+    element_not = PythonNot()
+    element_output = OutputData()
+    
+    flow = Flow()
+    flow.add_element(element_input)
+    flow.add_element(element_not)
+    flow.add_element(element_output)
+    flow.connect(element_input.data, element_not.input)
+    flow.connect(element_not.result, element_output.data)
+    
+    element_input.set_value(True)
+    flow.run()
+    self.assertFalse(element_output.result())
+    
+    element_input.set_value(False)
+    flow.run()
+    self.assertTrue(element_output.result())
+    
