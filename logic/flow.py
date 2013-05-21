@@ -128,23 +128,39 @@ class Flow(object):
         for new_invalid_connector in new_invalid_connectors:
           self.invalidate(new_invalid_connector)
   
-  def run(self, elements_to_do = None):
+  def run(self, elements_to_do = None, debug = False):
     if elements_to_do is None:
+      self.iteration = 0
       elements_to_do = self.elements[:]
+    self.iteration += 1
+
+    if debug:
+      print
+      print self.title, ":: run() :: iteration", self.iteration
+      print self.title, "  len(elements_to_do) =", len(elements_to_do)
+      print
     
     elements_left = []
     elements_done = 0
     for element in elements_to_do:
       if element.is_ready() and not element.is_done():
-        element.run_or_block()
+        if debug:
+          print self.title, "  execute element :", element
+        element.run_or_block(debug = debug)
         elements_done += 1
       else:
         elements_left.append(element)
+
+    if debug:
+      print
+      print self.title, "  elements_done =", elements_done
+      print self.title, "  len(elements_left) =", len(elements_left)
+      print
     
     if elements_done == 0:
       return True
     
-    return self.run(elements_left)
+    return self.run(elements_left, debug = debug)
   
 
   def debug_state(self):

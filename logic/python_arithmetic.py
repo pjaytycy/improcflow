@@ -9,7 +9,7 @@ class PythonAddition(Element):
     self.term2 = self.add_input_connector(title = "term2")
     self.sum = self.add_output_connector(title = "sum")
   
-  def run(self):
+  def run(self, debug = False):
     self.sum.set_value(self.term1.value + self.term2.value)
     
 register_element_type(PythonAddition)
@@ -24,7 +24,7 @@ class PythonSubtraction(Element):
     self.term2 = self.add_input_connector(title = "term2")
     self.difference = self.add_output_connector(title = "difference")
   
-  def run(self):
+  def run(self, debug = False):
     self.difference.set_value(self.term1.value - self.term2.value)
     
 register_element_type(PythonSubtraction)
@@ -39,7 +39,7 @@ class PythonMultiplication(Element):
     self.factor2 = self.add_input_connector(title = "factor2")
     self.product = self.add_output_connector(title = "product")
   
-  def run(self):
+  def run(self, debug = False):
     self.product.set_value(self.factor1.value * self.factor2.value)
     
 register_element_type(PythonMultiplication)
@@ -54,7 +54,7 @@ class PythonTrueDivision(Element):
     self.divisor = self.add_input_connector(title = "divisor")
     self.quotient = self.add_output_connector(title = "quotient")
   
-  def run(self):
+  def run(self, debug = False):
     # We don't use 'from __future__ import division', because that will change division operators
     # in the whole Python instance running at the moment. Also float(x)/y does not work in case
     # x is a complex number or a NumPy-array. The x*1.0/y method seems most convenient and robust.
@@ -73,7 +73,7 @@ class PythonModulo(Element):
     self.divisor = self.add_input_connector(title = "divisor")
     self.remainder = self.add_output_connector(title = "remainder")
   
-  def run(self):
+  def run(self, debug = False):
     self.remainder.set_value(self.dividend.value % self.divisor.value)
     
 register_element_type(PythonModulo)
@@ -88,7 +88,7 @@ class PythonExponentiation(Element):
     self.exponent = self.add_input_connector(title = "exponent")
     self.power = self.add_output_connector(title = "power")
   
-  def run(self):
+  def run(self, debug = False):
     self.power.set_value(self.base.value ** self.exponent.value)
     
 register_element_type(PythonExponentiation)
@@ -103,7 +103,7 @@ class PythonFloorDivision(Element):
     self.divisor = self.add_input_connector(title = "divisor")
     self.quotient = self.add_output_connector(title = "quotient")
   
-  def run(self):
+  def run(self, debug = False):
     self.quotient.set_value(self.dividend.value // self.divisor.value)
     
 register_element_type(PythonFloorDivision)

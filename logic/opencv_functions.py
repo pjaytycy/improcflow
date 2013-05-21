@@ -11,7 +11,7 @@ class OpenCVMean(Element):
     self.src = self.add_input_connector(title = "src", data_types = [numpy.ndarray])
     self.mean = self.add_output_connector(title = "mean")
     
-  def run(self):
+  def run(self, debug = False):
     avg_list = cv2.mean(self.src.value)
     self.mean.set_value(avg_list[0])
     

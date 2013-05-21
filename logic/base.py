@@ -194,14 +194,14 @@ class Element(object):
     return result
   
   
-  def run_or_block(self):
+  def run_or_block(self, debug = False):
     if self.is_blocked():
       self.block()
     else:
       self.number_of_runs += 1
-      if DEBUG:
+      if DEBUG or debug:
         print "%s %s run (# %d)" % (self.__class__.__name__, self.title, self.number_of_runs)
-      self.run()
+      self.run(debug = debug)
   
   
   def block(self):
@@ -278,8 +278,8 @@ class Connection(Element):
       self.dst.invalidate()
     
         
-  def run(self):
-    if DEBUG:
+  def run(self, debug = False):
+    if DEBUG or debug:
       print "  Connection %s from %s to %s" % (self.title, self.src.title, self.dst.title)
     self.dst.set_value(self.src.value)
 
