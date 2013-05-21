@@ -1,12 +1,14 @@
-from improcflow.models import FlowModel
+from improcflow.models import FlowModel, ElementModel
 from improcflow.logic import get_class_for_element_type
 from improcflow.logic import Element, Connection
+from improcflow.logic import InputData, OutputData
 
 class ElementNotFoundError(Exception):
   pass
 
-class Flow(object):
+class Flow(Element):
   def __init__(self, title = None, flow_id = None):
+    super(Flow, self).__init__(title = title, element_model = None)
     if flow_id is None:
       self.create_new(title)
     else:
@@ -17,8 +19,10 @@ class Flow(object):
     self.title = title
     if title is None:
       self.flow_model = FlowModel()
+      self.element_model = ElementModel(class_name = self.class_name)
     else:
       self.flow_model = FlowModel(title = title)
+      self.element_model = ElementModel(class_name = self.class_name, title = title)
     self.flow_model.save()
     
   def load_from_database(self, flow_id):
@@ -53,6 +57,14 @@ class Flow(object):
   def add_element(self, element):
     element.set_flow(self)
     self.elements.append(element)
+    
+    if (type(element) == InputData) and not(element.title is None):
+      self.input_connectors.append(element.data_in)
+      setattr(self, element.title, element.data_in)
+    
+    if (type(element) == OutputData) and not(element.title is None):
+      self.output_connectors.append(element.data_out)
+      setattr(self, element.title, element.data_out)
   
   def get_element(self, title = None, element_id = None):
     if element_id is not None:
@@ -133,7 +145,7 @@ class Flow(object):
       self.iteration = 0
       elements_to_do = self.elements[:]
     self.iteration += 1
-
+    
     if debug:
       print
       print self.title, ":: run() :: iteration", self.iteration

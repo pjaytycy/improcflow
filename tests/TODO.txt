@@ -5,6 +5,12 @@ ordered by:
 => real example from OpenCV docs as high as possible
 
 *) implement sub-routines
+    - check all functions which are/were common between Flow and Element
+        invalidate
+        flow_control
+        create_new
+        load_from_database
+    - check save/load from database
 *) implement or simulate for-loops (map, reduce, zip, append, extend)
 *) implement some OpenCV functions (GaussianBlur, split, Canny, dilate, threshold, findContours, arcLength, approxPolyDP, contourArea, isContourConvex, drawContours)
 *) implement some NumPy functions (reshape, max, dot)
@@ -20,3 +26,4 @@ ordered by:
     - conditional assignment undefined
     - define element with same class_name as an other element
     - try to run PythonComparisonBase, which has no run() function
+*) check save/load from database for elements with variable number of inputs (ie: ConditionalAssignment)
