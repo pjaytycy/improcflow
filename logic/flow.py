@@ -75,7 +75,7 @@ class Flow(object):
   def remove_element(self, element):
     # invalidate all the output connectors of this element + everything in this flow that depends on them
     for invalid_connector in element.output_connectors:
-      self.invalidate(invalid_connector)
+      self.invalidate_chain(invalid_connector)
     
     # Remove the element from this flow object
     self.elements.remove(element)
@@ -115,18 +115,18 @@ class Flow(object):
     self.elements.remove(connection)
     needs_invalidate = connection.dst.default_needs_invalidate()
     if needs_invalidate:
-      self.invalidate(connection.dst)
+      self.invalidate_chain(connection.dst)
     connection.dst.default()  # need to set default *after* invalidate()
     connection.delete()
   
-  def invalidate(self, invalid_connector):
-    invalid_connector.invalidate()
+  def invalidate_chain(self, invalid_connector):
+    invalid_connector.invalidate_connector()
     for element in self.elements:
       if invalid_connector in element.input_connectors:
         # only return connectors which were still valid and are now made invalid
-        new_invalid_connectors = element.invalidate(invalid_connector)
+        new_invalid_connectors = element.invalidate_element(invalid_connector)
         for new_invalid_connector in new_invalid_connectors:
-          self.invalidate(new_invalid_connector)
+          self.invalidate_chain(new_invalid_connector)
   
   def run(self, elements_to_do = None, debug = False):
     if elements_to_do is None:

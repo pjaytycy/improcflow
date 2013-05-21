@@ -11,9 +11,9 @@ class InputData(Element):
   def set_value(self, src):
     self.data_in.set_value(src)
     if self.flow:
-      self.flow.invalidate(self.data)
+      self.flow.invalidate_chain(self.data)
     else:
-      self.data.invalidate()
+      self.data.invalidate_connector()
   
   def run(self, debug = False):
     self.data.set_value(self.data_in.value)
@@ -34,7 +34,7 @@ class OutputData(Element):
     if self.is_ready() and not self.is_blocked():
       return self.data.value
     return None
-
+  
   def run(self, debug = False):
     self.data_out.set_value(self.data.value)
     

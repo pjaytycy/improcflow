@@ -68,10 +68,10 @@ class Connector(object):
       self.set_value(self.default_value)
     
     
-  def invalidate(self):
+  def invalidate_connector(self):
     # This function only invalidates this single connector. If you 
     # want to invalidate the full chain behind a connector, use:
-    #    flow.invalidate(connector)
+    #    flow.invalidate_chain(connector)
     
     if DEBUG:
       print "%s %s invalidate" % (self.element.title, self.title)
@@ -172,10 +172,10 @@ class Element(object):
     
     return None
   
-  def invalidate(self, invalid_connector):
+  def invalidate_element(self, invalid_connector):
     # This function only invalidates output connectors of this element. If you 
     # want to invalidate the full chain behind a connector, use:
-    #    self.flow.invalidate(connector)
+    #    self.flow.invalidate_chain(connector)
     #
     # invalidate all output connectors if one input connector changes
     # only report output connectors that were valid previously!
@@ -188,7 +188,7 @@ class Element(object):
     
     for output_connector in self.output_connectors:
       if output_connector.is_ready():
-        output_connector.invalidate()
+        output_connector.invalidate_connector()
         result.append(output_connector)
         
     return result
@@ -273,9 +273,9 @@ class Connection(Element):
     self.connection_model.save()
     
     if self.flow:
-      self.flow.invalidate(self.dst)
+      self.flow.invalidate_chain(self.dst)
     else:
-      self.dst.invalidate()
+      self.dst.invalidate_connector()
     
         
   def run(self, debug = False):
