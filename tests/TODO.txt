@@ -9,6 +9,7 @@ ordered by:
         create_new
         load_from_database
     - check save/load from database
+        seperate class name
 *) implement or simulate for-loops (map, reduce, zip, append, extend)
 *) implement some OpenCV functions (GaussianBlur, split, Canny, dilate, threshold, findContours, arcLength, approxPolyDP, contourArea, isContourConvex, drawContours)
 *) implement some NumPy functions (reshape, max, dot)

@@ -148,5 +148,8 @@ class PythonSubFlowTests(TestCase):
     self.flow.connect(self.element_input_1.data, self.sub_flow.term2)
     self.flow.run()
     self.assertEqual(6, self.element_output.result())
-    
+  
+  def test_no_double_constructor_calls(self):
+    all_flows = Flow.get_all_saved_flows()
+    self.assertEqual(2, len(all_flows))
     

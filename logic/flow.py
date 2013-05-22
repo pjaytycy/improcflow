@@ -10,19 +10,17 @@ class Flow(Element):
   def __init__(self, title = None, flow_id = None):
     super(Flow, self).__init__(title = title, element_model = None)
     if flow_id is None:
-      self.create_new(title)
+      self.create_new_flow()
     else:
       self.load_from_database(flow_id)
         
-  def create_new(self, title = None):
+  def create_new_flow(self):
+    # don't repeat the actions from create_new_element() !
     self.elements = []
-    self.title = title
-    if title is None:
+    if self.title is None:
       self.flow_model = FlowModel()
-      self.element_model = ElementModel(class_name = self.class_name)
     else:
-      self.flow_model = FlowModel(title = title)
-      self.element_model = ElementModel(class_name = self.class_name, title = title)
+      self.flow_model = FlowModel(title = self.title)
     self.flow_model.save()
     
   def load_from_database(self, flow_id):

@@ -102,11 +102,11 @@ class Element(object):
     self.flow = None
     self.number_of_runs = 0
     if element_model is None:
-      self.create_new(title)
+      self.create_new_element(title)
     else:
       self.load_from_database(element_model = element_model)
       
-  def create_new(self, title = None):
+  def create_new_element(self, title = None):
     self.title = title
     if title is None:
       self.element_model = ElementModel(class_name = self.class_name)
