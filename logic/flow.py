@@ -1,5 +1,5 @@
 from improcflow.models import FlowModel, ElementModel
-from improcflow.logic import get_class_for_element_type
+from improcflow.logic import get_class_for_element_type, register_element_type
 from improcflow.logic import Element, Connection
 from improcflow.logic import InputData, OutputData
 
@@ -7,24 +7,39 @@ class ElementNotFoundError(Exception):
   pass
 
 class Flow(Element):
-  def __init__(self, title = None, flow_id = None):
-    super(Flow, self).__init__(title = title, element_model = None)
-    if flow_id is None:
+  class_name = "flow"
+  
+  def __init__(self, title = None, flow_id = None, element_model = None):
+    if (flow_id is None) and (element_model is None):
+      # creating a new object : first create the Element(), then create a new flow
+      super(Flow, self).__init__(title = title)
       self.create_new_flow()
     else:
-      self.load_from_database(flow_id)
+      # loading an existing object : first get the element_model, then load the element from DB, then load the flow from DB
+      if (element_model is None):
+        # assume flow_id is not None
+        # get flow_model and element_model from flow_id
+        flow_model = FlowModel.objects.get(pk = flow_id)
+        element_model = flow_model.element
+      else:
+        # we got element_model, get flow_model from it
+        flow_model = element_model.flowmodel
+        
+      super(Flow, self).__init__(title = title, element_model = element_model)
+        
+      self.load_flow_from_database(flow_model)
         
   def create_new_flow(self):
     # don't repeat the actions from create_new_element() !
     self.elements = []
     if self.title is None:
-      self.flow_model = FlowModel()
+      self.flow_model = FlowModel(element = self.element_model)
     else:
-      self.flow_model = FlowModel(title = self.title)
+      self.flow_model = FlowModel(element = self.element_model, title = self.title)
     self.flow_model.save()
     
-  def load_from_database(self, flow_id):
-    self.flow_model = FlowModel.objects.get(pk = flow_id)
+  def load_flow_from_database(self, flow_model = None):
+    self.flow_model = flow_model
     self.title = self.flow_model.title
     self.elements = []
     for element_model in self.flow_model.elementmodel_set.all():
@@ -50,7 +65,7 @@ class Flow(Element):
     return FlowModel.objects.all()
     
   def get_id(self):
-    return self.flow_model.id
+    return self.element_model.id
   
   def add_element(self, element):
     element.set_flow(self)
@@ -69,6 +84,11 @@ class Flow(Element):
       for element in self.elements:
         if element.element_model.id == element_id:
           return element
+        if isinstance(element, Flow):
+          try:
+            return element.get_element(element_id = element_id)
+          except ElementNotFoundError:
+            pass
       raise ElementNotFoundError("Could not find element with id == %d" % (element_id))
           
     if title is not None:
@@ -187,3 +207,5 @@ class Flow(Element):
     for element in self.elements:
       element.debug_state()
     print "==== ===="
+
+register_element_type(Flow)

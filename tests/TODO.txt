@@ -6,7 +6,6 @@ ordered by:
 
 *) implement sub-routines
     - check all functions which are/were common between Flow and Element
-        create_new
         load_from_database
     - check save/load from database
         seperate class name

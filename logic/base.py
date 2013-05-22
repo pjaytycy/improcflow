@@ -104,7 +104,7 @@ class Element(object):
     if element_model is None:
       self.create_new_element(title)
     else:
-      self.load_from_database(element_model = element_model)
+      self.load_element_from_database(element_model = element_model)
       
   def create_new_element(self, title = None):
     self.title = title
@@ -112,13 +112,14 @@ class Element(object):
       self.element_model = ElementModel(class_name = self.class_name)
     else:
       self.element_model = ElementModel(class_name = self.class_name, title = title)
+    self.element_model.save()
 
   def set_flow(self, flow):
     self.flow = flow
     self.element_model.flow = flow.flow_model
     self.element_model.save()
     
-  def load_from_database(self, element_model = None):
+  def load_element_from_database(self, element_model = None):
     self.element_model = element_model
     self.title = self.element_model.title
   

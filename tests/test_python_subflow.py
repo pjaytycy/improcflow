@@ -22,9 +22,9 @@ class PythonSubFlowTests(TestCase):
     
     self.sub_flow = sub_flow
     
-    self.element_input_1 = InputData()
-    self.element_input_2 = InputData()
-    self.element_output = OutputData()
+    self.element_input_1 = InputData("main_input_1")
+    self.element_input_2 = InputData("main_input_2")
+    self.element_output = OutputData("main_output")
     
     self.flow = Flow(title = "main_flow")
     self.flow.add_element(self.element_input_1)
@@ -150,6 +150,17 @@ class PythonSubFlowTests(TestCase):
     self.assertEqual(6, self.element_output.result())
   
   def test_no_double_constructor_calls(self):
+    # setUp() creates 2 Flow objects
     all_flows = Flow.get_all_saved_flows()
     self.assertEqual(2, len(all_flows))
     
+  def test_save_and_load_a_flow_with_subflow(self):
+    flow_id = self.flow.get_id()
+    sub_flow_id = self.sub_flow.get_id()
+   
+    flow2 = Flow(flow_id = flow_id)
+#    element_output_2 = flow2.get_element("test_output")
+#    sub_flow2 = flow2.get_element("wrap_add")
+#    
+#    sub_flow3 = Flow(flow_id = sub_flow_id)
+#    
