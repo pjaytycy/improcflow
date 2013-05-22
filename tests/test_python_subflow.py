@@ -62,5 +62,23 @@ class PythonSubFlowTests(TestCase):
     
     self.assertIsNone(self.element_output.result())
     
+  def test_control_signal_blocked_blocks_execution(self):
+    element_bool = InputData()
+    element_bool.set_value(True)    # assign the value True, which would normally allow to continue
+    element_bool.block()            # but mark the element as blocked, which prevents propagation
+    self.flow.add_element(element_bool)
+    self.flow.connect(element_bool.data, self.sub_flow.flow_control)
+    self.flow.run()
     
+    self.assertIsNone(self.element_output.result())
+  
+  def test_control_signal_invalid_blocks_execution(self):
+    element_bool = InputData()
+    # not assigning any value makes the connector "invalid"
+    self.flow.add_element(element_bool)
+    self.flow.connect(element_bool.data, self.sub_flow.flow_control)
+    self.flow.run()
+    
+    self.assertIsNone(self.element_output.result())
+
     
