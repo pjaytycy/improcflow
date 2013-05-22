@@ -53,6 +53,14 @@ class PythonSubFlowTests(TestCase):
     
     self.assertEqual(8, self.element_output.result())
     
+  def test_control_signal_false_blocks_execution(self):
+    element_bool = InputData()
+    element_bool.set_value(False)
+    self.flow.add_element(element_bool)
+    self.flow.connect(element_bool.data, self.sub_flow.flow_control)
+    self.flow.run()
+    
+    self.assertIsNone(self.element_output.result())
     
     
     
