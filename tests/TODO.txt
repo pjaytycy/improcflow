@@ -26,4 +26,8 @@ ordered by:
     - conditional assignment undefined
     - define element with same class_name as an other element
     - try to run PythonComparisonBase, which has no run() function
-*) check save/load from database for elements with variable number of inputs (ie: ConditionalAssignment)
+    - connect an element which is not added to the flow (connect as src; connect as dst)
+*) robustness of elements with variable number of inputs (ie: ConditionalAssignment)
+    - check save/load from databse
+    - check disconnect/reconnect
+    
