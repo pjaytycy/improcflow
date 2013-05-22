@@ -140,6 +140,15 @@ class Flow(Element):
         for new_invalid_connector in new_invalid_connectors:
           self.invalidate_chain(new_invalid_connector)
   
+  # extend element.invalidate_element() in case of element == Flow()
+  # we need to also invalidate the internal flow, not just the output connectors
+  # at the end, we need to return the result of element.invalidate_element() 
+  # which is the list of output connectors that were invalidated
+  def invalidate_element(self, invalid_connector):
+    result = super(Flow, self).invalidate_element(invalid_connector)
+    self.invalidate_chain(invalid_connector)
+    return result
+  
   def run(self, elements_to_do = None, debug = False):
     if elements_to_do is None:
       self.iteration = 0

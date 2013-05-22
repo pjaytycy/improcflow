@@ -122,6 +122,16 @@ class PythonSubFlowTests(TestCase):
     self.assertEqual(8, self.element_output.result())
     element_bool.set_value(10)
     self.assertIsNone(self.element_output.result())
+   
+  def test_two_calls_to_run(self):
+    self.flow.run()
+    self.assertEqual(8, self.element_output.result())
     
+    self.element_input_1.set_value(9)
+    self.element_input_2.set_value(-3)
+    self.flow.run()
+    self.assertEqual(6, self.element_output.result())
+    
+
     
     
