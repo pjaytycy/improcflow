@@ -81,4 +81,47 @@ class PythonSubFlowTests(TestCase):
     
     self.assertIsNone(self.element_output.result())
 
+  def test_data_signal_blocked_blocks_execution(self):
+    self.element_input_1.block()
+    self.flow.run()
+    
+    self.assertIsNone(self.element_output.result())
+
+# tests for these 3 cases:
+# invalidate control connection (not disconnect) ==> invalidate mean & result
+# disconnect control connection which was False ==> invalidate mean & result, set control signal default (true)
+# disconnect control connection which was True ==> no changes in invalidate/control signal
+
+  def test_disconnect_control_connection_which_was_false(self):
+    element_bool = InputData()
+    element_bool.set_value(False)
+    self.flow.add_element(element_bool)
+    control_connection = self.flow.connect(element_bool.data, self.sub_flow.flow_control)
+    self.flow.run()
+    self.assertIsNone(self.element_output.result())
+    self.flow.disconnect(control_connection)
+    self.flow.run()
+    self.assertEqual(8, self.element_output.result())
+  
+  def test_disconnect_control_connection_which_was_true(self):
+    element_bool = InputData()
+    element_bool.set_value(True)
+    self.flow.add_element(element_bool)
+    control_connection = self.flow.connect(element_bool.data, self.sub_flow.flow_control)
+    self.flow.run()
+    self.assertEqual(8, self.element_output.result())
+    self.flow.disconnect(control_connection)
+    self.assertEqual(8, self.element_output.result())
+    
+  def test_invalidate_control_connection(self):
+    element_bool = InputData()
+    element_bool.set_value(True)
+    self.flow.add_element(element_bool)
+    control_connection = self.flow.connect(element_bool.data, self.sub_flow.flow_control)
+    self.flow.run()
+    self.assertEqual(8, self.element_output.result())
+    element_bool.set_value(10)
+    self.assertIsNone(self.element_output.result())
+    
+    
     
