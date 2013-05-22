@@ -132,6 +132,21 @@ class PythonSubFlowTests(TestCase):
     self.flow.run()
     self.assertEqual(6, self.element_output.result())
     
-
+  def test_multiple_set_value_calls(self):
+    self.element_input_1.set_value(9)
+    self.element_input_2.set_value(-3)
+    self.element_input_2.set_value(0)
+    self.element_input_2.set_value(2)
+    self.flow.run()
+    self.assertEqual(11, self.element_output.result())
+    self.element_input_2.set_value(5)
+    self.assertIsNone(self.element_output.result())
+  
+  def test_change_flow_structure_between_two_calls_to_run(self):
+    self.flow.run()
+    self.assertEqual(8, self.element_output.result())
+    self.flow.connect(self.element_input_1.data, self.sub_flow.term2)
+    self.flow.run()
+    self.assertEqual(6, self.element_output.result())
     
     
