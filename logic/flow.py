@@ -1,35 +1,51 @@
-from improcflow.models import FlowModel
-from improcflow.logic import get_class_for_element_type
+from improcflow.models import FlowModel, ElementModel
+from improcflow.logic import get_class_for_element_type, register_element_type
 from improcflow.logic import Element, Connection
+from improcflow.logic import InputData, OutputData
 
 class ElementNotFoundError(Exception):
   pass
 
-class Flow(object):
-  def __init__(self, title = None, flow_id = None):
-    if flow_id is None:
-      self.create_new(title)
+class Flow(Element):
+  class_name = "flow"
+  
+  def __init__(self, title = None, flow_id = None, element_model = None):
+    if (flow_id is None) and (element_model is None):
+      # creating a new object : first create the Element(), then create a new flow
+      super(Flow, self).__init__(title = title)
+      self.create_new_flow()
     else:
-      self.load_from_database(flow_id)
+      # loading an existing object : first get the element_model, then load the element from DB, then load the flow from DB
+      if (element_model is None):
+        # assume flow_id is not None
+        # get flow_model and element_model from flow_id
+        flow_model = FlowModel.objects.get(pk = flow_id)
+        element_model = flow_model.element
+      else:
+        # we got element_model, get flow_model from it
+        flow_model = element_model.flowmodel
         
-  def create_new(self, title = None):
+      super(Flow, self).__init__(title = title, element_model = element_model)
+        
+      self.load_flow_from_database(flow_model)
+        
+  def create_new_flow(self):
+    # don't repeat the actions from create_new_element() !
     self.elements = []
-    self.title = title
-    if title is None:
-      self.flow_model = FlowModel()
+    if self.title is None:
+      self.flow_model = FlowModel(element = self.element_model)
     else:
-      self.flow_model = FlowModel(title = title)
+      self.flow_model = FlowModel(element = self.element_model, title = self.title)
     self.flow_model.save()
     
-  def load_from_database(self, flow_id):
-    self.flow_model = FlowModel.objects.get(pk = flow_id)
+  def load_flow_from_database(self, flow_model = None):
+    self.flow_model = flow_model
     self.title = self.flow_model.title
     self.elements = []
     for element_model in self.flow_model.elementmodel_set.all():
       specific_class = get_class_for_element_type(element_model.class_name)
       element = specific_class(element_model = element_model)
-      element.set_flow(self)
-      self.elements.append(element)
+      self.add_element(element)
     
     for element in self.elements:
       if not(isinstance(element, Connection)):
@@ -48,17 +64,30 @@ class Flow(object):
     return FlowModel.objects.all()
     
   def get_id(self):
-    return self.flow_model.id
+    return self.element_model.id
   
   def add_element(self, element):
     element.set_flow(self)
     self.elements.append(element)
+    
+    if (type(element) == InputData) and not(element.title is None):
+      self.input_connectors.append(element.data_in)
+      setattr(self, element.title, element.data_in)
+    
+    if (type(element) == OutputData) and not(element.title is None):
+      self.output_connectors.append(element.data_out)
+      setattr(self, element.title, element.data_out)
   
   def get_element(self, title = None, element_id = None):
     if element_id is not None:
       for element in self.elements:
         if element.element_model.id == element_id:
           return element
+        if isinstance(element, Flow):
+          try:
+            return element.get_element(element_id = element_id)
+          except ElementNotFoundError:
+            pass
       raise ElementNotFoundError("Could not find element with id == %d" % (element_id))
           
     if title is not None:
@@ -75,7 +104,7 @@ class Flow(object):
   def remove_element(self, element):
     # invalidate all the output connectors of this element + everything in this flow that depends on them
     for invalid_connector in element.output_connectors:
-      self.invalidate(invalid_connector)
+      self.invalidate_chain(invalid_connector)
     
     # Remove the element from this flow object
     self.elements.remove(element)
@@ -115,40 +144,68 @@ class Flow(object):
     self.elements.remove(connection)
     needs_invalidate = connection.dst.default_needs_invalidate()
     if needs_invalidate:
-      self.invalidate(connection.dst)
+      self.invalidate_chain(connection.dst)
     connection.dst.default()  # need to set default *after* invalidate()
     connection.delete()
   
-  def invalidate(self, invalid_connector):
-    invalid_connector.invalidate()
+  def invalidate_chain(self, invalid_connector):
+    invalid_connector.invalidate_connector()
     for element in self.elements:
       if invalid_connector in element.input_connectors:
         # only return connectors which were still valid and are now made invalid
-        new_invalid_connectors = element.invalidate(invalid_connector)
+        new_invalid_connectors = element.invalidate_element(invalid_connector)
         for new_invalid_connector in new_invalid_connectors:
-          self.invalidate(new_invalid_connector)
+          self.invalidate_chain(new_invalid_connector)
   
-  def run(self, elements_to_do = None):
+  # extend element.invalidate_element() in case of element == Flow()
+  # we need to also invalidate the internal flow, not just the output connectors
+  # at the end, we need to return the result of element.invalidate_element() 
+  # which is the list of output connectors that were invalidated
+  def invalidate_element(self, invalid_connector):
+    result = super(Flow, self).invalidate_element(invalid_connector)
+    self.invalidate_chain(invalid_connector)
+    return result
+  
+  def run(self, elements_to_do = None, debug = False):
     if elements_to_do is None:
+      self.iteration = 0
       elements_to_do = self.elements[:]
+    self.iteration += 1
+    
+    if debug:
+      print
+      print self.title, ":: run() :: iteration", self.iteration
+      print self.title, "  len(elements_to_do) =", len(elements_to_do)
+      print
     
     elements_left = []
     elements_done = 0
     for element in elements_to_do:
       if element.is_ready() and not element.is_done():
-        element.run_or_block()
+        if debug:
+          print self.title, "  execute element :", element
+        element.run_or_block(debug = debug)
         elements_done += 1
       else:
         elements_left.append(element)
+
+    if debug:
+      print
+      print self.title, "  elements_done =", elements_done
+      print self.title, "  len(elements_left) =", len(elements_left)
+      print
     
     if elements_done == 0:
       return True
     
-    return self.run(elements_left)
+    return self.run(elements_left, debug = debug)
   
 
   def debug_state(self):
     print "==== FLOW : %s ====" % self.title
+    super(Flow, self).debug_state()
     for element in self.elements:
       element.debug_state()
     print "==== ===="
+
+register_element_type(Flow)

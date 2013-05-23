@@ -1,6 +1,7 @@
 from django.db import models
 
 class FlowModel(models.Model):
+  element = models.OneToOneField('ElementModel', primary_key = True)
   title = models.CharField(max_length = 120, default = "untitled")
   
   def __unicode__(self):
@@ -9,7 +10,7 @@ class FlowModel(models.Model):
 
 class ElementModel(models.Model):
   title = models.CharField(max_length = 120, default = "untitled")
-  flow = models.ForeignKey(FlowModel)
+  flow = models.ForeignKey(FlowModel, null = True)
   class_name = models.CharField(max_length = 120, default = "element")
   
   def __unicode__(self):

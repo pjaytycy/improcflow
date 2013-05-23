@@ -4,7 +4,6 @@ ordered by:
 => no dependencies on items lower in the list
 => real example from OpenCV docs as high as possible
 
-*) implement sub-routines
 *) implement or simulate for-loops (map, reduce, zip, append, extend)
 *) implement some OpenCV functions (GaussianBlur, split, Canny, dilate, threshold, findContours, arcLength, approxPolyDP, contourArea, isContourConvex, drawContours)
 *) implement some NumPy functions (reshape, max, dot)
@@ -20,3 +19,8 @@ ordered by:
     - conditional assignment undefined
     - define element with same class_name as an other element
     - try to run PythonComparisonBase, which has no run() function
+    - connect an element which is not added to the flow (connect as src; connect as dst)
+*) robustness of elements with variable number of inputs (ie: ConditionalAssignment)
+    - check save/load from databse
+    - check disconnect/reconnect
+    
