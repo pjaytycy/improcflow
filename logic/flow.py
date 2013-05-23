@@ -45,8 +45,7 @@ class Flow(Element):
     for element_model in self.flow_model.elementmodel_set.all():
       specific_class = get_class_for_element_type(element_model.class_name)
       element = specific_class(element_model = element_model)
-      element.set_flow(self)
-      self.elements.append(element)
+      self.add_element(element)
     
     for element in self.elements:
       if not(isinstance(element, Connection)):
@@ -204,6 +203,7 @@ class Flow(Element):
 
   def debug_state(self):
     print "==== FLOW : %s ====" % self.title
+    super(Flow, self).debug_state()
     for element in self.elements:
       element.debug_state()
     print "==== ===="

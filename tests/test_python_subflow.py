@@ -159,8 +159,22 @@ class PythonSubFlowTests(TestCase):
     sub_flow_id = self.sub_flow.get_id()
    
     flow2 = Flow(flow_id = flow_id)
-#    element_output_2 = flow2.get_element("test_output")
-#    sub_flow2 = flow2.get_element("wrap_add")
-#    
-#    sub_flow3 = Flow(flow_id = sub_flow_id)
-#    
+    flow2_id = flow2.get_id()
+    sub_flow2 = flow2.get_element("wrap_add")
+    sub_flow2_id = sub_flow2.get_id()
+    
+    self.assertEqual(flow_id, flow2_id)
+    self.assertEqual(sub_flow_id, sub_flow2_id)
+   
+    sub_flow3 = Flow(flow_id = sub_flow_id)
+    sub_flow3_id = sub_flow3.get_id()
+    
+    self.assertEqual(sub_flow_id, sub_flow3_id)
+    
+    element_input_1 = flow2.get_element("main_input_1")
+    element_input_2 = flow2.get_element("main_input_2")
+    element_output = flow2.get_element("main_output")
+    element_input_1.set_value(5)
+    element_input_2.set_value(3)
+    flow2.run()
+    self.assertEqual(8, element_output.result())
