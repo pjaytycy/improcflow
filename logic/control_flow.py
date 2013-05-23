@@ -32,7 +32,7 @@ class ConditionalAssignment(Element):
     return (num_inputs_not_blocked != 1)
   
   
-  def run(self):
+  def run(self, debug = False):
     input_ok = None
     for input in self.input_datas:
       if not input.is_blocked():

@@ -68,10 +68,10 @@ class Connector(object):
       self.set_value(self.default_value)
     
     
-  def invalidate(self):
+  def invalidate_connector(self):
     # This function only invalidates this single connector. If you 
     # want to invalidate the full chain behind a connector, use:
-    #    flow.invalidate(connector)
+    #    flow.invalidate_chain(connector)
     
     if DEBUG:
       print "%s %s invalidate" % (self.element.title, self.title)
@@ -102,23 +102,24 @@ class Element(object):
     self.flow = None
     self.number_of_runs = 0
     if element_model is None:
-      self.create_new(title)
+      self.create_new_element(title)
     else:
-      self.load_from_database(element_model = element_model)
+      self.load_element_from_database(element_model = element_model)
       
-  def create_new(self, title = None):
+  def create_new_element(self, title = None):
     self.title = title
     if title is None:
       self.element_model = ElementModel(class_name = self.class_name)
     else:
       self.element_model = ElementModel(class_name = self.class_name, title = title)
+    self.element_model.save()
 
   def set_flow(self, flow):
     self.flow = flow
     self.element_model.flow = flow.flow_model
     self.element_model.save()
     
-  def load_from_database(self, element_model = None):
+  def load_element_from_database(self, element_model = None):
     self.element_model = element_model
     self.title = self.element_model.title
   
@@ -172,10 +173,10 @@ class Element(object):
     
     return None
   
-  def invalidate(self, invalid_connector):
+  def invalidate_element(self, invalid_connector):
     # This function only invalidates output connectors of this element. If you 
     # want to invalidate the full chain behind a connector, use:
-    #    self.flow.invalidate(connector)
+    #    self.flow.invalidate_chain(connector)
     #
     # invalidate all output connectors if one input connector changes
     # only report output connectors that were valid previously!
@@ -188,20 +189,20 @@ class Element(object):
     
     for output_connector in self.output_connectors:
       if output_connector.is_ready():
-        output_connector.invalidate()
+        output_connector.invalidate_connector()
         result.append(output_connector)
         
     return result
   
   
-  def run_or_block(self):
+  def run_or_block(self, debug = False):
     if self.is_blocked():
       self.block()
     else:
       self.number_of_runs += 1
-      if DEBUG:
+      if DEBUG or debug:
         print "%s %s run (# %d)" % (self.__class__.__name__, self.title, self.number_of_runs)
-      self.run()
+      self.run(debug = debug)
   
   
   def block(self):
@@ -273,13 +274,13 @@ class Connection(Element):
     self.connection_model.save()
     
     if self.flow:
-      self.flow.invalidate(self.dst)
+      self.flow.invalidate_chain(self.dst)
     else:
-      self.dst.invalidate()
+      self.dst.invalidate_connector()
     
         
-  def run(self):
-    if DEBUG:
+  def run(self, debug = False):
+    if DEBUG or debug:
       print "  Connection %s from %s to %s" % (self.title, self.src.title, self.dst.title)
     self.dst.set_value(self.src.value)
 

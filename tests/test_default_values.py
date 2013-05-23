@@ -18,9 +18,9 @@ class DefaultValueTests(TestCase):
 
       def set_mock_value(self, src):
         self.mock.set_value(src)
-        self.flow.invalidate(self.dst)
+        self.flow.invalidate_chain(self.dst)
       
-      def run(self):
+      def run(self, debug = False):
         if self.mock.value is None:
           self.dst.set_value(self.src.value)
         else:
@@ -85,9 +85,9 @@ class DefaultValueTests(TestCase):
 
       def set_mock_value(self, src):
         self.mock.set_value(src)
-        self.flow.invalidate(self.dst)
+        self.flow.invalidate_chain(self.dst)
       
-      def run(self):
+      def run(self, debug = False):
         if self.mock.value is None:
           self.dst.set_value(self.src.value)
         else:
