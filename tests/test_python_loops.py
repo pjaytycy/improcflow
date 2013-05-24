@@ -37,7 +37,7 @@ class PythonLoopTests(TestCase):
   #
   # I don't need everything from the beginning...
   
-  def test_simple_loop(self):
+  def test_simple_loop_only_map_func(self):
     # [x**2 for x in range(10)] => [0, 1, 4, 9, 16, 25, 36, 49, 64, 81]
     flow = Flow()
     element_input = InputData()
@@ -65,3 +65,44 @@ class PythonLoopTests(TestCase):
     
     self.assertEqual([0, 1, 4, 9, 16, 25, 36, 49, 64, 81], element_output.result())
 
+  def test_simple_loop_only_filter_func(self):
+    # [x for x in range(10) if (x % 3) == 0] => [0, 3, 6, 9]
+    flow = Flow()
+    element_input = InputData()
+    element_input.set_value(range(10))
+    element_param_1 = InputData()
+    element_param_1.set_value(3)
+    element_param_2 = InputData()
+    element_param_2.set_value(0)
+    element_loop_start, element_loop_stop = PythonLoop()
+    element_modulo = PythonModulo()
+    element_equal = PythonIsEqualTo()
+    element_output = OutputData()
+    
+    flow.add_element(element_input)
+    flow.add_element(element_param_1)
+    flow.add_element(element_param_2)    
+    flow.add_element(element_loop_start)
+    flow.add_element(element_modulo)
+    flow.add_element(element_equal)
+    flow.add_element(element_loop_stop)
+    flow.add_element(element_output)
+    
+    # before the loop
+    flow.connect(element_input.data, element_loop_start.list_in)
+    flow.connect(element_param_1.data, element_modulo.divisor)
+    flow.connect(element_param_2.data, element_equal.right)
+    # inside the loop : transform the data
+    flow.connect(element_loop_start.list_item, element_loop_stop.list_item)
+    # inside the loop : apply the filter
+    flow.connect(element_loop_start.list_item, element_modulo.dividend)
+    flow.connect(element_modulo.remainder, element_equal.left)
+    flow.connect(element_equal.result, element_loop_stop.append)
+    # after the loop
+    flow.connect(element_loop_stop.list_out, element_output.data)
+    
+    flow.run()
+    
+    self.assertEqual([0, 3, 6, 9], element_output.result())
+
+    
