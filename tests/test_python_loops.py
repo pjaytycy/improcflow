@@ -168,4 +168,62 @@ class PythonLoopTests(TestCase):
     self.assertEqual(element_loop_start.element_model.id, element_loop_start_2.element_model.id)
     self.assertEqual(element_loop_stop.element_model.id, element_loop_stop_2.element_model.id)
     
+  def test_save_load_loop(self):
+    # [x**2 for x in range(10) if (x % 3) == 0] => [0, 9, 36, 81]
+    flow = Flow()
+    element_input = InputData(title = "main_input")
+    element_input.set_value(range(10))
+    element_const_2 = InputData(title = "const_2")
+    element_const_2.set_value(2)
+    element_const_3 = InputData(title = "const_3")
+    element_const_3.set_value(3)
+    element_const_0 = InputData(title = "const_0")
+    element_const_0.set_value(0)
+    element_loop_start, element_loop_stop = PythonLoop()
+    element_square = PythonExponentiation()
+    element_modulo = PythonModulo()
+    element_equal = PythonIsEqualTo()
+    element_output = OutputData(title = "main_output")
+    
+    flow.add_element(element_input)
+    flow.add_element(element_const_2)
+    flow.add_element(element_const_3)
+    flow.add_element(element_const_0)
+    flow.add_element(element_loop_start)
+    flow.add_element(element_square)
+    flow.add_element(element_modulo)
+    flow.add_element(element_equal)
+    flow.add_element(element_loop_stop)
+    flow.add_element(element_output)
+    
+    # before the loop
+    flow.connect(element_input.data, element_loop_start.list_in)
+    flow.connect(element_const_2.data, element_square.exponent)
+    flow.connect(element_const_3.data, element_modulo.divisor)
+    flow.connect(element_const_0.data, element_equal.right)
+    # inside the loop : transform the data
+    flow.connect(element_loop_start.list_item, element_square.base)
+    flow.connect(element_square.power, element_loop_stop.list_item)
+    # inside the loop : apply the filter
+    flow.connect(element_loop_start.list_item, element_modulo.dividend)
+    flow.connect(element_modulo.remainder, element_equal.left)
+    flow.connect(element_equal.result, element_loop_stop.append)
+    # after the loop
+    flow.connect(element_loop_stop.list_out, element_output.data)
+    
+    flow_id = flow.get_id()
+    
+    flow2 = Flow(flow_id = flow_id)
+    element_input2 = flow2.get_element("main_input")
+    element_input2.set_value(range(10))
+    element_const2_2 = flow2.get_element("const_2")
+    element_const2_2.set_value(2)
+    element_const2_3 = flow2.get_element("const_3")
+    element_const2_3.set_value(3)
+    element_const2_0 = flow2.get_element("const_0")
+    element_const2_0.set_value(0)
+    element_output2 = flow2.get_element("main_output")
+    flow2.run()
+    
+    self.assertEqual([0, 9, 36, 81], element_output2.result())
     

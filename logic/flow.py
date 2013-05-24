@@ -10,6 +10,8 @@ class Flow(Element):
   class_name = "flow"
   
   def __init__(self, title = None, flow_id = None, element_model = None):
+    self.elements = []
+    self.element_groups = []
     if (flow_id is None) and (element_model is None):
       # creating a new object : first create the Element(), then create a new flow
       super(Flow, self).__init__(title = title)
@@ -31,7 +33,6 @@ class Flow(Element):
         
   def create_new_flow(self):
     # don't repeat the actions from create_new_element() !
-    self.elements = []
     if self.title is None:
       self.flow_model = FlowModel(element = self.element_model)
     else:
@@ -41,11 +42,11 @@ class Flow(Element):
   def load_flow_from_database(self, flow_model = None):
     self.flow_model = flow_model
     self.title = self.flow_model.title
-    self.elements = []
     for element_model in self.flow_model.elementmodel_set.all():
       specific_class = get_class_for_element_type(element_model.class_name)
       element = specific_class(element_model = element_model)
       self.add_element(element)
+      element.find_and_set_group_update_grouplist(self.element_groups)
     
     for element in self.elements:
       if not(isinstance(element, Connection)):

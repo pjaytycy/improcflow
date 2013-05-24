@@ -1,21 +1,19 @@
-from improcflow.logic import Element, register_element_type
+from improcflow.logic import Element, ElementGroup, register_element_type
 
 
-class PythonLoop(object):
+class PythonLoop(ElementGroup):
   def __init__(self, title = None):
+    super(PythonLoop, self).__init__(title = title)
     if title is None:
-      self.start = PythonLoopStart()
-      self.stop = PythonLoopStop()
+      start = PythonLoopStart()
+      stop = PythonLoopStop()
     else:
-      self.start = PythonLoopStart(title = title + "_start")
-      self.stop = PythonLoopStop(title = title + "_stop")
+      start = PythonLoopStart(title = title + "_start")
+      stop = PythonLoopStop(title = title + "_stop")
       
-    self.stop.loop_start = self.start
+    self.add_element(start)
+    self.add_element(stop)
     
-  def __iter__(self):
-    yield self.start
-    yield self.stop
-
 
 class PythonLoopStart(Element):
   class_name = "python_loop_start"
@@ -63,6 +61,18 @@ class PythonLoopStop(Element):
     self.loop_start = None
     self.tmp_list = []
 
+  def find_loop_start(self):
+    if self.loop_start is not None:
+      return
+      
+    result = self.element_group.get_elements_of_type(PythonLoopStart)
+    if len(result) != 1:
+      print "find_loop_start() failed: len(result) =", len(result)
+      return
+    
+    self.loop_start = result[0]
+      
+      
   def run(self, debug = False):
     if debug:
       print "append =", self.append.value, "list_item =", self.list_item.value
@@ -71,6 +81,7 @@ class PythonLoopStop(Element):
       self.tmp_list.append(self.list_item.value)
     
     try:
+      self.find_loop_start()
       self.loop_start.run_or_block(debug = debug)
       
     except StopIteration:

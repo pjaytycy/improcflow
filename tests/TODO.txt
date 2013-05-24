@@ -5,7 +5,6 @@ ordered by:
 => real example from OpenCV docs as high as possible
 
 *) implement or simulate for-loops (map, reduce, zip, append, extend)
-    - name the main element & 2 sub elements, check if you can use get_element() to get them
     - PythonLoopStop: automatically go to the next item if append = False, don't wait till list_item becomes valid
     - add the modify a variable part
     - add the continue/break statements
