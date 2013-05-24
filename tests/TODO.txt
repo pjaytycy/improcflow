@@ -6,7 +6,6 @@ ordered by:
 
 *) implement or simulate for-loops (map, reduce, zip, append, extend)
     - name the main element & 2 sub elements, check if you can use get_element() to get them
-    - add the filter part [... if f(x)]
     - PythonLoopStop: automatically go to the next item if append = False, don't wait till list_item becomes valid
     - add the modify a variable part
     - add the continue/break statements
