@@ -9,6 +9,9 @@ ordered by:
     - PythonLoopStop: automatically go to the next item if append = False, don't wait till list_item becomes valid
     - add the modify a variable part
     - add the continue/break statements
+    - what about flow_control connector for PythonLoopStart() / PythonLoopStop() elements?
+    - remove "Python" prefix from element name PythonLoopStart/Stop. Move to control_flow.py file.
+    - save/load in database
 *) implement some OpenCV functions (GaussianBlur, split, Canny, dilate, threshold, findContours, arcLength, approxPolyDP, contourArea, isContourConvex, drawContours)
 *) implement some NumPy functions (reshape, max, dot)
 *) implement some Python functions (range, len, sqrt, abs)

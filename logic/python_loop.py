@@ -2,9 +2,14 @@ from improcflow.logic import Element, register_element_type
 
 
 class PythonLoop(object):
-  def __init__(self):
-    self.start = PythonLoopStart()
-    self.stop = PythonLoopStop()
+  def __init__(self, title = None):
+    if title is None:
+      self.start = PythonLoopStart()
+      self.stop = PythonLoopStop()
+    else:
+      self.start = PythonLoopStart(title = title + "_start")
+      self.stop = PythonLoopStop(title = title + "_stop")
+      
     self.stop.loop_start = self.start
     
   def __iter__(self):

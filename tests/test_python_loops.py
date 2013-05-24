@@ -152,3 +152,20 @@ class PythonLoopTests(TestCase):
     flow.run()
     
     self.assertEqual([0, 9, 36, 81], element_output.result())
+
+  def test_loop_naming(self):
+    element_loop_start, element_loop_stop = PythonLoop("testloop")
+    self.assertEqual("testloop_start", element_loop_start.title)
+    self.assertEqual("testloop_stop", element_loop_stop.title)
+
+    flow = Flow()
+    flow.add_element(element_loop_start)
+    flow.add_element(element_loop_stop)
+    
+    element_loop_start_2 = flow.get_element("testloop_start")
+    element_loop_stop_2 = flow.get_element("testloop_stop")
+    
+    self.assertEqual(element_loop_start.element_model.id, element_loop_start_2.element_model.id)
+    self.assertEqual(element_loop_stop.element_model.id, element_loop_stop_2.element_model.id)
+    
+    
