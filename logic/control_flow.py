@@ -46,18 +46,20 @@ class ConditionalAssignment(Element):
 register_element_type(ConditionalAssignment)
 
 
-class PythonLoop(ElementGroup):
-  def __init__(self, title = None):
-    super(PythonLoop, self).__init__(title = title)
-    if title is None:
-      start = LoopStart()
-      stop = LoopStop()
-    else:
-      start = LoopStart(title = title + "_start")
-      stop = LoopStop(title = title + "_stop")
-      
-    self.add_element(start)
-    self.add_element(stop)
+def PythonLoop(title = None):
+  loop_group = ElementGroup(title = title)
+  
+  if title is None:
+    start = LoopStart()
+    stop = LoopStop()
+  else:
+    start = LoopStart(title = title + "_start")
+    stop = LoopStop(title = title + "_stop")
+    
+  loop_group.add_element(start)
+  loop_group.add_element(stop)
+  
+  return start, stop
     
 
 class LoopStart(Element):

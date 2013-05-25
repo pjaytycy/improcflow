@@ -346,7 +346,3 @@ class ElementGroup(object):
         result.append(element)
     return result
    
-  def __iter__(self):
-    for element in self.elements:
-      yield element
-      
