@@ -9,7 +9,6 @@ from flow import Flow, ElementNotFoundError
 
 # special elements for improcflow
 from control_flow import *
-from python_loop import *
 
 # elements for standard Python 
 from python_arithmetic import *
