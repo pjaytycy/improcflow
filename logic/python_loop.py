@@ -25,9 +25,16 @@ class PythonLoopStart(Element):
     self.i = 0
 
   def run(self, debug = False):
+    self.flow.invalidate_chain(self.list_item)
     value = self.get_next_item(debug = debug)
-    self.set_next_item(value, debug = debug)
+    self.list_item.set_value(value)
   
+  def is_done(self):
+    if not(self.i < len(self.list_in.value)):
+      return True
+    
+    return super(PythonLoopStart, self).is_done()
+    
   def get_next_item(self, debug = False):
     if debug: 
       print "get_next_item : self.i =", self.i, "=>", 
@@ -43,9 +50,6 @@ class PythonLoopStart(Element):
       print result
     return result
     
-  def set_next_item(self, value, debug = False):
-    self.flow.invalidate_chain(self.list_item)
-    self.list_item.set_value(value)
   
 register_element_type(PythonLoopStart)
 
@@ -72,7 +76,13 @@ class PythonLoopStop(Element):
     
     self.loop_start = result[0]
       
-      
+  def is_ready(self):
+    if self.append.is_ready():
+      if self.append.value == False:
+        return True
+        
+    return super(PythonLoopStop, self).is_ready()
+    
   def run(self, debug = False):
     if debug:
       print "append =", self.append.value, "list_item =", self.list_item.value

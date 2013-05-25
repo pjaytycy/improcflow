@@ -5,12 +5,12 @@ ordered by:
 => real example from OpenCV docs as high as possible
 
 *) implement or simulate for-loops (map, reduce, zip, append, extend)
-    - PythonLoopStop: automatically go to the next item if append = False, don't wait till list_item becomes valid
     - add the modify a variable part
     - add the continue/break statements
     - what about flow_control connector for PythonLoopStart() / PythonLoopStop() elements?
     - remove "Python" prefix from element name PythonLoopStart/Stop. Move to control_flow.py file.
-    - save/load in database
+    - make it thread safe (ie: check for self.i read/write races in is_ready()/is_done()/run_or_block())
+    - make it possible to execute on 2 list items at the same time by different processing units
 *) implement some OpenCV functions (GaussianBlur, split, Canny, dilate, threshold, findContours, arcLength, approxPolyDP, contourArea, isContourConvex, drawContours)
 *) implement some NumPy functions (reshape, max, dot)
 *) implement some Python functions (range, len, sqrt, abs)

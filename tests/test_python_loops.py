@@ -226,4 +226,52 @@ class PythonLoopTests(TestCase):
     flow2.run()
     
     self.assertEqual([0, 9, 36, 81], element_output2.result())
+  
+  
+  def test_stop_map_func_if_filter_func_is_false(self):
+    # [x**2 for x in range(10) if False] => []
+    # verify x**2 is never calculated
+    flow = Flow()
+    element_input = InputData()
+    element_input.set_value(range(10))
+    element_const_2 = InputData()
+    element_const_2.set_value(2)
+    element_const_false = InputData()
+    element_const_false.set_value(False)
+    element_loop_start, element_loop_stop = PythonLoop()
+    element_square = PythonExponentiation()
+    element_output = OutputData()
+    
+    flow.add_element(element_input)
+    flow.add_element(element_const_2)
+    flow.add_element(element_const_false)
+    flow.add_element(element_loop_start)
+    flow.add_element(element_loop_stop)
+    flow.add_element(element_square)
+    flow.add_element(element_output)
+    
+    flow.connect(element_input.data, element_loop_start.list_in)
+    flow.connect(element_const_2.data, element_square.exponent)
+    flow.connect(element_const_false.data, element_loop_stop.append)
+    flow.connect(element_loop_start.list_item, element_square.base)
+    flow.connect(element_square.power, element_loop_stop.list_item)
+    flow.connect(element_loop_stop.list_out, element_output.data)
+    
+    flow.run()
+    
+    # The correct working of this test depends on the order in which elements / connections are added to flow
+    # and the order in which they are executed. This test might need changes if we ever make it execute
+    # elements out-of-order or in parallel.
+    # If element_loop_stop and element_square are swapped in order, we have a chain where we execute the
+    # element_square every iteration:
+    #   iteration 1
+    #     element_loop_stop + element_loop_start
+    #     connection element_loop_start.list_item => element_square.base
+    #   iteration X
+    #     element_square
+    #     element_loop_stop + element_loop_start
+    #     connection element_loop_start.list_item => element_square.base
+    
+    self.assertEqual([], element_output.result())
+    self.assertEqual(0, element_square.get_number_of_executions())
     
