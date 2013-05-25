@@ -1,4 +1,4 @@
-from improcflow.models import ElementModel, ConnectionModel
+from improcflow.models import ElementModel, ConnectionModel, ElementGroupModel
 from improcflow.logic import convert_data
 
 DEBUG = False
@@ -100,6 +100,7 @@ class Element(object):
     self.output_connectors = []
     self.flow_control = self.add_input_connector(title = "flow_control", default_value = True)
     self.flow = None
+    self.element_group = None
     self.number_of_runs = 0
     if element_model is None:
       self.create_new_element(title)
@@ -118,11 +119,30 @@ class Element(object):
     self.flow = flow
     self.element_model.flow = flow.flow_model
     self.element_model.save()
+  
+  def set_element_group(self, element_group):
+    self.element_group = element_group
+    self.element_model.group = element_group.element_group_model
+    self.element_model.save()
     
   def load_element_from_database(self, element_model = None):
     self.element_model = element_model
     self.title = self.element_model.title
-  
+
+  def find_and_set_group_update_grouplist(self, element_groups):
+    if self.element_model.group is None:
+      return
+    
+    for element_group in element_groups:
+      if element_group.element_group_model == self.element_model.group:
+        element_group.add_element(self)
+        return
+    
+    element_group = ElementGroup(element_group_model = self.element_model.group)
+    element_group.add_element(self)
+    element_groups.append(element_group)
+    return
+
   def delete(self):
     self.element_model.delete()
 
@@ -293,3 +313,36 @@ class Connection(Element):
     super(Connection, self).block()
     
 register_element_type(Connection)
+
+
+class ElementGroup(object):
+  def __init__(self, title = None, element_group_model = None):
+    self.elements = []
+    if (element_group_model is None):
+      self.create_new_element_group(title = title)
+    else:
+      self.load_element_group_from_database(element_group_model)
+
+  def create_new_element_group(self, title = None):
+    self.title = title
+    if title is None:
+      self.element_group_model = ElementGroupModel()
+    else:
+      self.element_group_model = ElementGroupModel(title = title)
+    self.element_group_model.save()
+    
+  def load_element_group_from_database(self, element_group_model = None):
+    self.element_group_model = element_group_model
+    self.title = self.element_group_model.title
+    
+  def add_element(self, element):
+    element.set_element_group(self)
+    self.elements.append(element)
+
+  def get_elements_of_type(self, type):
+    result = []
+    for element in self.elements:
+      if isinstance(element, type):
+        result.append(element)
+    return result
+   
