@@ -1,6 +1,6 @@
 from convert import convert_data
 from base import register_element_type, get_class_for_element_type
-from base import Connector, Element, Connection
+from base import Connector, Element, Connection, ElementGroup
 from io_functions import InputData, OutputData
 from flow import Flow, ElementNotFoundError
 

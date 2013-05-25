@@ -10,6 +10,8 @@ class Flow(Element):
   class_name = "flow"
   
   def __init__(self, title = None, flow_id = None, element_model = None):
+    self.elements = []
+    self.element_groups = []
     if (flow_id is None) and (element_model is None):
       # creating a new object : first create the Element(), then create a new flow
       super(Flow, self).__init__(title = title)
@@ -31,7 +33,6 @@ class Flow(Element):
         
   def create_new_flow(self):
     # don't repeat the actions from create_new_element() !
-    self.elements = []
     if self.title is None:
       self.flow_model = FlowModel(element = self.element_model)
     else:
@@ -41,11 +42,11 @@ class Flow(Element):
   def load_flow_from_database(self, flow_model = None):
     self.flow_model = flow_model
     self.title = self.flow_model.title
-    self.elements = []
     for element_model in self.flow_model.elementmodel_set.all():
       specific_class = get_class_for_element_type(element_model.class_name)
       element = specific_class(element_model = element_model)
       self.add_element(element)
+      element.find_and_set_group_update_grouplist(self.element_groups)
     
     for element in self.elements:
       if not(isinstance(element, Connection)):
@@ -166,39 +167,29 @@ class Flow(Element):
     self.invalidate_chain(invalid_connector)
     return result
   
-  def run(self, elements_to_do = None, debug = False):
-    if elements_to_do is None:
-      self.iteration = 0
-      elements_to_do = self.elements[:]
-    self.iteration += 1
-    
+  def run(self, iteration = 0, debug = False):
     if debug:
       print
-      print self.title, ":: run() :: iteration", self.iteration
-      print self.title, "  len(elements_to_do) =", len(elements_to_do)
+      print self.title, ":: run() :: iteration", iteration
       print
     
-    elements_left = []
     elements_done = 0
-    for element in elements_to_do:
+    for element in self.elements:
       if element.is_ready() and not element.is_done():
         if debug:
           print self.title, "  execute element :", element
         element.run_or_block(debug = debug)
         elements_done += 1
-      else:
-        elements_left.append(element)
 
     if debug:
       print
       print self.title, "  elements_done =", elements_done
-      print self.title, "  len(elements_left) =", len(elements_left)
       print
     
     if elements_done == 0:
       return True
     
-    return self.run(elements_left, debug = debug)
+    return self.run(iteration + 1, debug = debug)
   
 
   def debug_state(self):
