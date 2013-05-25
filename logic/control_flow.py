@@ -46,7 +46,7 @@ class ConditionalAssignment(Element):
 register_element_type(ConditionalAssignment)
 
 
-def PythonLoop(title = None):
+def create_loop(title = None):
   loop_group = ElementGroup(title = title)
   
   if title is None:

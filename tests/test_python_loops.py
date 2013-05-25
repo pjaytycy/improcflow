@@ -4,7 +4,7 @@ from django.test import TestCase
 
 from improcflow.logic import *
 
-class PythonLoopTests(TestCase):
+class LoopTests(TestCase):
   # vision: base all loop / iteration / ... on a combination of:
   #
   # 1) generator expressions / list comprehensions:
@@ -44,7 +44,7 @@ class PythonLoopTests(TestCase):
     element_input.set_value(range(10))
     element_param = InputData()
     element_param.set_value(2)
-    element_loop_start, element_loop_stop = PythonLoop()
+    element_loop_start, element_loop_stop = create_loop()
     element_square = PythonExponentiation()
     element_output = OutputData()
     
@@ -74,7 +74,7 @@ class PythonLoopTests(TestCase):
     element_param_1.set_value(3)
     element_param_2 = InputData()
     element_param_2.set_value(0)
-    element_loop_start, element_loop_stop = PythonLoop()
+    element_loop_start, element_loop_stop = create_loop()
     element_modulo = PythonModulo()
     element_equal = PythonIsEqualTo()
     element_output = OutputData()
@@ -117,7 +117,7 @@ class PythonLoopTests(TestCase):
     element_const_3.set_value(3)
     element_const_0 = InputData()
     element_const_0.set_value(0)
-    element_loop_start, element_loop_stop = PythonLoop()
+    element_loop_start, element_loop_stop = create_loop()
     element_square = PythonExponentiation()
     element_modulo = PythonModulo()
     element_equal = PythonIsEqualTo()
@@ -154,7 +154,7 @@ class PythonLoopTests(TestCase):
     self.assertEqual([0, 9, 36, 81], element_output.result())
 
   def test_loop_naming(self):
-    element_loop_start, element_loop_stop = PythonLoop("testloop")
+    element_loop_start, element_loop_stop = create_loop("testloop")
     self.assertEqual("testloop_start", element_loop_start.title)
     self.assertEqual("testloop_stop", element_loop_stop.title)
 
@@ -179,7 +179,7 @@ class PythonLoopTests(TestCase):
     element_const_3.set_value(3)
     element_const_0 = InputData(title = "const_0")
     element_const_0.set_value(0)
-    element_loop_start, element_loop_stop = PythonLoop()
+    element_loop_start, element_loop_stop = create_loop()
     element_square = PythonExponentiation()
     element_modulo = PythonModulo()
     element_equal = PythonIsEqualTo()
@@ -238,7 +238,7 @@ class PythonLoopTests(TestCase):
     element_const_2.set_value(2)
     element_const_false = InputData()
     element_const_false.set_value(False)
-    element_loop_start, element_loop_stop = PythonLoop()
+    element_loop_start, element_loop_stop = create_loop()
     element_square = PythonExponentiation()
     element_output = OutputData()
     

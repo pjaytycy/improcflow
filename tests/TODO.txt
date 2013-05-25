@@ -7,8 +7,7 @@ ordered by:
 *) implement or simulate for-loops (map, reduce, zip, append, extend)
     - add the modify a variable part
     - add the continue/break statements
-    - what about flow_control connector for PythonLoopStart() / PythonLoopStop() elements?
-    - remove "Python" prefix from element name PythonLoopStart/Stop. Move to control_flow.py file.
+    - what about flow_control connector for LoopStart() / LoopStop() elements?
     - make it thread safe (ie: check for self.i read/write races in is_ready()/is_done()/run_or_block())
     - make it possible to execute on 2 list items at the same time by different processing units
 *) implement some OpenCV functions (GaussianBlur, split, Canny, dilate, threshold, findContours, arcLength, approxPolyDP, contourArea, isContourConvex, drawContours)
