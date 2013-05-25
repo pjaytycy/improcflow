@@ -4,12 +4,6 @@ ordered by:
 => no dependencies on items lower in the list
 => real example from OpenCV docs as high as possible
 
-*) implement or simulate for-loops (map, reduce, zip, append, extend)
-    - add the modify a variable part
-    - add the continue/break statements
-    - what about flow_control connector for LoopStart() / LoopStop() elements?
-    - make it thread safe (ie: check for self.i read/write races in is_ready()/is_done()/run_or_block())
-    - make it possible to execute on 2 list items at the same time by different processing units
 *) implement some OpenCV functions (GaussianBlur, split, Canny, dilate, threshold, findContours, arcLength, approxPolyDP, contourArea, isContourConvex, drawContours)
 *) implement some NumPy functions (reshape, max, dot)
 *) implement some Python functions (range, len, sqrt, abs)
@@ -30,4 +24,10 @@ ordered by:
 *) robustness of elements with variable number of inputs (ie: ConditionalAssignment)
     - check save/load from databse
     - check disconnect/reconnect
+*) extend for-loops
+    - add fmodify a variable part
+    - add the continue/break statements
+    - what about flow_control connector for LoopStart() / LoopStop() elements?
+    - make it thread safe (ie: check for self.i read/write races in is_ready()/is_done()/run_or_block())
+    - make it possible to execute on 2 list items at the same time by different processing units
     
