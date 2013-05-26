@@ -159,4 +159,22 @@ class OpenCVDilateTests(TestCase):
     black_border[:, 0] = 0
     
     numpy.testing.assert_equal(black_border, self.element_output.result())
+    
+  def test_dilate_custom_iterations_ocv_231(self):
+    # same test as above, which tests the actual behaviour (which is wrong)
+    # after upgrade to OpenCV 2.4.3, remove this test and use the one above
+    white_on_black = self.full_black.copy()
+    white_on_black[1, 3] = 255
+        
+    self.element_src.set_value(white_on_black)
+    
+    self.flow.connect(self.element_iterations.data, self.element_dilate.iterations)
+    self.element_iterations.set_value(2)
+    
+    self.flow.run()
+    
+    black_border = self.full_white.copy()
+    black_border[4, :] = 0
+    
+    numpy.testing.assert_equal(black_border, self.element_output.result())
   
