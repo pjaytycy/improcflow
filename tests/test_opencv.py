@@ -138,3 +138,25 @@ class OpenCVDilateTests(TestCase):
     
     numpy.testing.assert_equal(fat_white_on_black_shift, self.element_output.result())
     
+  @unittest.expectedFailure  
+  # fail due to bug in OpenCV 2.3.1
+  # bug: http://code.opencv.org/issues/2348
+  # fixed: https://github.com/Itseez/opencv/commit/9956c42804cf7f9e930db69aae243bfa4a9a7e87
+  # released: OpenCV 2.4.3
+  def test_dilate_custom_iterations(self):
+    white_on_black = self.full_black.copy()
+    white_on_black[1, 3] = 255
+        
+    self.element_src.set_value(white_on_black)
+    
+    self.flow.connect(self.element_iterations.data, self.element_dilate.iterations)
+    self.element_iterations.set_value(2)
+    
+    self.flow.run()
+    
+    black_border = self.full_white.copy()
+    black_border[4, :] = 0
+    black_border[:, 0] = 0
+    
+    numpy.testing.assert_equal(black_border, self.element_output.result())
+  
