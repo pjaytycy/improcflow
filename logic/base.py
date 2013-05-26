@@ -14,7 +14,7 @@ def get_class_for_element_type(class_name):
   
   
 class Connector(object):
-  def __init__(self, element, title = None, data_types = None, **kwargs):
+  def __init__(self, element, title, data_types = None, **kwargs):
     self.blocked = False
     self.element = element
     self.title = title
@@ -265,8 +265,8 @@ class Connection(Element):
   
   def __init__(self, title = None, element_model = None):
     super(Connection, self).__init__(title = title, element_model = element_model)
-    self.src = self.add_input_connector()
-    self.dst = self.add_output_connector()
+    self.src = self.add_input_connector(title = "tmp_src")
+    self.dst = self.add_output_connector(title = "tmp_dst")
     if element_model is None:
       self.connection_model = None
     else:

@@ -30,4 +30,6 @@ ordered by:
     - what about flow_control connector for LoopStart() / LoopStop() elements?
     - make it thread safe (ie: check for self.i read/write races in is_ready()/is_done()/run_or_block())
     - make it possible to execute on 2 list items at the same time by different processing units
-    
+*) automatic conversion
+    - add automatic depth conversion 
+        (ie: by default numpy will convert lists to int32, while OpenCV usually wants uint8 or uint16)
