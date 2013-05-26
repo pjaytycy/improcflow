@@ -100,3 +100,41 @@ class OpenCVDilateTests(TestCase):
     
     numpy.testing.assert_equal(black_on_white, self.element_output.result())
     
+  def test_dilate_custom_kernel(self):
+    white_on_black = self.full_black.copy()
+    white_on_black[1:4, 2] = 255
+    white_on_black[2, 1:4] = 255
+    
+    self.element_src.set_value(white_on_black)
+    
+    self.flow.connect(self.element_kernel.data, self.element_dilate.kernel)
+    kernel = numpy.array([[0, 0, 0], [0, 0, 0], [1, 0, 0]], dtype = numpy.uint8)
+    self.element_kernel.set_value(kernel)
+    
+    self.flow.run()
+    
+    white_on_black_shift = self.full_black.copy()
+    white_on_black_shift[0:3, 3] = 255
+    white_on_black_shift[1, 2:5] = 255
+    
+    numpy.testing.assert_equal(white_on_black_shift, self.element_output.result())
+    
+  def test_dilate_custom_anchor(self):
+    white_on_black = self.full_black.copy()
+    white_on_black[1:4, 2] = 255
+    white_on_black[2, 1:4] = 255
+    
+    self.element_src.set_value(white_on_black)
+    
+    self.flow.connect(self.element_anchor.data, self.element_dilate.anchor)
+    self.element_anchor.set_value((0, 2))
+    
+    self.flow.run()
+    
+    fat_white_on_black_shift = self.full_white.copy()
+    fat_white_on_black_shift[0, :] = 0
+    fat_white_on_black_shift[:, 4] = 0
+    fat_white_on_black_shift[1, 3] = 0
+    
+    numpy.testing.assert_equal(fat_white_on_black_shift, self.element_output.result())
+    
