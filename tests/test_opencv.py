@@ -229,4 +229,17 @@ class OpenCVDilateTests(TestCase):
     # result[2, 3] = 255
     # result[1, 2] = 255
     # numpy.testing.assert_equal(result, self.element_output.result())
+  
+  def test_dilate_custom_border_value(self):
+    self.element_src.set_value(self.full_black.copy())
     
+    self.flow.connect(self.element_border_value.data, self.element_dilate.border_value)
+    self.element_border_value.set_value(100)
+    
+    self.flow.run()
+    
+    result = self.full_black.copy()
+    result[(0, 4), :] = 100
+    result[:, (0, 4)] = 100
+    
+    numpy.testing.assert_equal(result, self.element_output.result())
