@@ -243,3 +243,79 @@ class OpenCVDilateTests(TestCase):
     result[:, (0, 4)] = 100
     
     numpy.testing.assert_equal(result, self.element_output.result())
+
+
+class OpenCVGaussianBlurTests(TestCase):
+  def setUp(self):
+    self.element_src = InputData(title = "element_src")
+    self.element_kernel_size = InputData(title = "element_kernel_size")
+    self.element_sigma_x = InputData(title = "element_sigma_x")
+    self.element_sigma_y = InputData(title = "element_sigma_y")
+    self.element_border_type = InputData(title = "element_border_type")
+    self.element_gaussian_blur = OpenCVGaussianBlur(title = "element_gaussian_blur")
+    self.element_output = OutputData(title = "element_output")
+
+    self.flow = Flow()
+    self.flow.add_element(self.element_src)
+    self.flow.add_element(self.element_kernel_size)
+    self.flow.add_element(self.element_sigma_x)
+    self.flow.add_element(self.element_sigma_y)
+    self.flow.add_element(self.element_border_type)
+    self.flow.add_element(self.element_gaussian_blur)
+    self.flow.add_element(self.element_output)
+    self.flow.connect(self.element_src.data, self.element_gaussian_blur.src)
+    self.flow.connect(self.element_gaussian_blur.dst, self.element_output.data)
+
+    self.full_white = numpy.ones([8, 8], dtype = numpy.uint8) * 255
+    self.full_black = numpy.zeros([8, 8], dtype = numpy.uint8)
+    
+    # default kernel (5x5):
+    def_1D = numpy.array([[0.0625, 0.250, 0.375, 0.250, 0.0625]])
+    self.default_kernel_float = numpy.dot(def_1D.transpose(), def_1D)
+    self.default_kernel_8U = numpy.round(255 * self.default_kernel_float).astype(numpy.uint8)
+  
+  def test_default_gaussian_blur_kernel(self):
+    kernel = numpy.array([[  1,  4,  6,  4,  1],
+                          [  4, 16, 24, 16,  4],
+                          [  6, 24, 36, 24,  6],
+                          [  4, 16, 24, 16,  4],
+                          [  1,  4,  6,  4,  1]])
+
+    numpy.testing.assert_equal(kernel, self.default_kernel_8U)
+    
+  def test_default_gaussian_blur_full_white(self):
+    self.element_src.set_value(self.full_white)
+    self.flow.run()
+    
+    numpy.testing.assert_equal(self.full_white, self.element_output.result())
+
+  def test_default_gaussian_blur_full_black(self):
+    self.element_src.set_value(self.full_black)
+    self.flow.run()
+    
+    numpy.testing.assert_equal(self.full_black, self.element_output.result())
+    
+  def test_default_gaussian_blur_black_spot_on_white(self):
+    black_on_white = self.full_white.copy()
+    black_on_white[4, 4] = 0
+    
+    self.element_src.set_value(black_on_white)
+    self.flow.run()
+    
+    result = self.full_white.copy()
+    result[2:7, 2:7] -= self.default_kernel_8U
+    
+    numpy.testing.assert_equal(result, self.element_output.result())
+  
+  
+  def test_default_gaussian_blur_white_spot_on_black(self):
+    white_on_black = self.full_black.copy()
+    white_on_black[4, 4] = 255
+    
+    self.element_src.set_value(white_on_black)
+    self.flow.run()
+    
+    result = self.full_black.copy()
+    result[2:7, 2:7] = self.default_kernel_8U
+    
+    numpy.testing.assert_equal(result, self.element_output.result())
