@@ -341,3 +341,46 @@ class OpenCVGaussianBlurTests(TestCase):
     
     numpy.testing.assert_equal(result, self.element_output.result())
     
+  def test_gaussian_blur_custom_sigma_x(self):
+    white_on_black = self.full_black.copy()
+    white_on_black[4, 4] = 255
+    
+    self.element_src.set_value(white_on_black)
+    
+    # sigma_x = infinity --> flat filter in 1D : [0.2, 0.2, 0.2, 0.2, 0.2]
+    # sigma_y = 0 --> sigma_y = sigma_x
+    self.element_sigma_x.set_value(float("+inf"))
+    self.flow.connect(self.element_sigma_x.data, self.element_gaussian_blur.sigma_x)
+    
+    self.flow.run()
+    
+    kernel_float = numpy.ones([5, 5])/(5*5)
+    kernel_8U = numpy.round(255 * kernel_float).astype(numpy.uint8)
+    
+    result = self.full_black.copy()
+    result[2:7, 2:7] = kernel_8U
+    
+    numpy.testing.assert_equal(result, self.element_output.result())
+  
+  def test_gaussian_blur_custom_sigma_y(self):
+    white_on_black = self.full_black.copy()
+    white_on_black[4, 4] = 255
+    
+    self.element_src.set_value(white_on_black)
+    
+    # sigma_x = 0 --> standard filter
+    # sigma_y = inf --> flat filter in 1D : [0.2, 0.2, 0.2, 0.2, 0.2]
+    self.element_sigma_y.set_value(float("+inf"))
+    self.flow.connect(self.element_sigma_y.data, self.element_gaussian_blur.sigma_y)
+    
+    self.flow.run()
+    
+    kernel_flat = numpy.array([[0.2, 0.2, 0.2, 0.2, 0.2]])
+    kernel_float = numpy.dot(kernel_flat.transpose(), self.kernel_5_1D)
+    kernel_8U = numpy.round(255 * kernel_float).astype(numpy.uint8)
+    
+    result = self.full_black.copy()
+    result[2:7, 2:7] = kernel_8U
+    
+    numpy.testing.assert_equal(result, self.element_output.result())
+    
