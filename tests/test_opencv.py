@@ -269,9 +269,10 @@ class OpenCVGaussianBlurTests(TestCase):
     self.full_white = numpy.ones([8, 8], dtype = numpy.uint8) * 255
     self.full_black = numpy.zeros([8, 8], dtype = numpy.uint8)
     
-    # default kernel (5x5):
-    def_1D = numpy.array([[0.0625, 0.250, 0.375, 0.250, 0.0625]])
-    self.default_kernel_float = numpy.dot(def_1D.transpose(), def_1D)
+    # default kernels:
+    self.kernel_3_1D = numpy.array([[0.25, 0.50, 0.25]])
+    self.kernel_5_1D = numpy.array([[0.0625, 0.250, 0.375, 0.250, 0.0625]])
+    self.default_kernel_float = numpy.dot(self.kernel_5_1D.transpose(), self.kernel_5_1D)
     self.default_kernel_8U = numpy.round(255 * self.default_kernel_float).astype(numpy.uint8)
   
   def test_default_gaussian_blur_kernel(self):
@@ -307,7 +308,6 @@ class OpenCVGaussianBlurTests(TestCase):
     
     numpy.testing.assert_equal(result, self.element_output.result())
   
-  
   def test_default_gaussian_blur_white_spot_on_black(self):
     white_on_black = self.full_black.copy()
     white_on_black[4, 4] = 255
@@ -319,3 +319,25 @@ class OpenCVGaussianBlurTests(TestCase):
     result[2:7, 2:7] = self.default_kernel_8U
     
     numpy.testing.assert_equal(result, self.element_output.result())
+
+  def test_gaussian_blur_custom_kernel_size(self):
+    white_on_black = self.full_black.copy()
+    white_on_black[4, 4] = 255
+    
+    self.element_src.set_value(white_on_black)
+    
+    self.element_kernel_size.set_value((5, 3))    # width / height
+    self.flow.connect(self.element_kernel_size.data, self.element_gaussian_blur.kernel_size)
+    
+    self.flow.run()
+    
+    kernel_float = numpy.dot(self.kernel_3_1D.transpose(), self.kernel_5_1D)
+    self.assertEqual((3, 5), kernel_float.shape)     # rows / cols
+    
+    kernel_8U = numpy.round(255 * kernel_float).astype(numpy.uint8)
+    
+    result = self.full_black.copy()
+    result[3:6, 2:7] = kernel_8U
+    
+    numpy.testing.assert_equal(result, self.element_output.result())
+    
