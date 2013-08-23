@@ -384,3 +384,64 @@ class OpenCVGaussianBlurTests(TestCase):
     
     numpy.testing.assert_equal(result, self.element_output.result())
     
+  def test_gaussian_blur_custom_border_type(self):
+    # from: http://docs.opencv.org/modules/imgproc/doc/filtering.html
+    #
+    # Various border types, image boundaries are denoted with '|'
+    #
+    # * BORDER_REPLICATE:     aaaaaa|abcdefgh|hhhhhhh
+    # * BORDER_REFLECT:       fedcba|abcdefgh|hgfedcb
+    # * BORDER_REFLECT_101:   gfedcb|abcdefgh|gfedcba
+    # * BORDER_WRAP:          cdefgh|abcdefgh|abcdefg
+    # * BORDER_CONSTANT:      iiiiii|abcdefgh|iiiiiii  with some specified 'i'
+    #
+    # to test this: put one white dot at the edge
+    
+    white_on_black = self.full_black.copy()
+    white_on_black[0, 4] = 255
+    self.element_src.set_value(white_on_black)
+    
+    self.flow.connect(self.element_border_type.data, self.element_gaussian_blur.border_type)
+
+    self.element_border_type.set_value(cv2.BORDER_REPLICATE)
+    self.flow.run()
+    result = self.full_black.copy()
+    result[0:3, 2:7] = self.default_kernel_8U[2:5, :]
+    result[0:2, 2:7] += self.default_kernel_8U[3:5, :]
+    result[0, 2:7] += self.default_kernel_8U[4, :]
+    numpy.testing.assert_equal(result, self.element_output.result())
+    
+    self.element_border_type.set_value(cv2.BORDER_REFLECT)
+    self.flow.run()
+    result = self.full_black.copy()
+    result[0:3, 2:7] = self.default_kernel_8U[2:5, :]
+    result[0:2, 2:7] += self.default_kernel_8U[3:5, :]
+    numpy.testing.assert_equal(result, self.element_output.result())
+
+    # for some reason BORDER_WRAP is not supported 
+    #
+    # self.element_border_type.set_value(cv2.BORDER_WRAP)
+    # self.flow.run()
+    # result = self.full_black.copy()
+    # result[0:3, 2:7] = self.default_kernel_8U[2:5, :]
+    # result[6:9, 2:7] = self.default_kernel_8U[0:3, :]
+    # numpy.testing.assert_equal(result, self.element_output.result())
+
+    # to see the difference between CONSTANT and REFLECT_101 we have to move the white point 1 pixel
+    white_on_black = self.full_black.copy()
+    white_on_black[1, 4] = 255    
+    self.element_src.set_value(white_on_black)
+    
+    self.element_border_type.set_value(cv2.BORDER_CONSTANT)
+    self.flow.run()
+    result = self.full_black.copy()
+    result[0:4, 2:7] = self.default_kernel_8U[1:5, :]
+    numpy.testing.assert_equal(result, self.element_output.result())
+    
+    self.element_border_type.set_value(cv2.BORDER_REFLECT_101)
+    self.flow.run()
+    result = self.full_black.copy()
+    result[0:4, 2:7] = self.default_kernel_8U[1:5, :]
+    result[0:2, 2:7] += self.default_kernel_8U[3:5, :]
+    numpy.testing.assert_equal(result, self.element_output.result())
+    
