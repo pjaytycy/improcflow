@@ -4,7 +4,7 @@ ordered by:
 => no dependencies on items lower in the list
 => real example from OpenCV docs as high as possible
 
-*) implement some OpenCV functions (GaussianBlur, split, Canny, threshold, findContours, arcLength, approxPolyDP, contourArea, isContourConvex, drawContours)
+*) implement some OpenCV functions (split, Canny, threshold, findContours, arcLength, approxPolyDP, contourArea, isContourConvex, drawContours)
 *) implement some NumPy functions (reshape, max, dot)
 *) implement some Python functions (range, len, sqrt, abs)
 *) implement list-access ([])
